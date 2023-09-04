@@ -1,4 +1,4 @@
-# Google Magenta for Colab.
+# Google [Magenta](https://magenta.tensorflow.org/) for Colab.
 
 As [original repository](https://github.com/magenta/magenta) is no longer maintained.
 
