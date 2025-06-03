@@ -2,7 +2,7 @@
 
 YOLO'd version of Google AI [Magenta](https://magenta.tensorflow.org/) for Colab, as [original repository](https://github.com/magenta/magenta) is no longer maintained in that regard. This is set of duct-tape workarounds that keeps the stuff I need from Magenta working in Colab (Jun 2025).
 
-### Installation:
+### Installation
 
 #### Cell 1: install required packages & restart runtime
 ```
@@ -50,7 +50,8 @@ Pay attention how we do NOT run Magenta's own installation, `!pip install .`, or
 %cd /content/magenta
 ```
 
-#### Usage:
+### Usage
+
 Run like this:
 ```
 !python -m magenta.models.melody_rnn.melody_rnn_generate --config=attention_rnn --num_outputs=10 ...
