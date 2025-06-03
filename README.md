@@ -1,6 +1,6 @@
 # Magenta YOLO for Colab
 
-YOLO'd version of Google AI [Magenta](https://magenta.tensorflow.org/) for Colab, as [original repository](https://github.com/magenta/magenta) is no longer maintained in that regard. This is set of duct-tape workarounds that keeps the stuff I need from Magenta working in Colab (Jun 2025).
+YOLO'd version of Google AI [Magenta](https://magenta.tensorflow.org/) for Colab, as [original repository](https://github.com/magenta/magenta) is no longer maintained in that regard. This is a set of questionable duct-tape workarounds that keeps the stuff I need from Magenta working in Colab (Jun 2025).
 
 ### Installation
 
