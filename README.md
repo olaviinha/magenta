@@ -53,7 +53,7 @@ Pay attention how we do NOT run Magenta's own installation, `!pip install .`, or
 #### Usage:
 Run like this:
 ```
-!python -m magenta.models.improv_rnn.melody_rnn_generate --config=attention_rnn --num_outputs=10 ...
+!python -m magenta.models.melody_rnn.melody_rnn_generate --config=attention_rnn --num_outputs=10 ...
 ```
 
 **NOT** like this, as instructed in original Magenta repo:
