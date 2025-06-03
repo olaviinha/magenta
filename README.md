@@ -32,7 +32,7 @@ REQUIRED_PACKAGES = [
     'tf_slim==1.1.0',
     'wheel==0.37.1',
     'protobuf==3.20.0',
-    'pychord'
+    'pychord' # I don't think Magenta itself actually needs this but uhh I do...
 ]
 
 for pkg in REQUIRED_PACKAGES:
