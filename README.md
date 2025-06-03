@@ -42,7 +42,7 @@ import os
 os.kill(os.getpid(), 9)
 ```
 
-#### Cell 2: clone the repo
+#### Cell 2: clone the repo (note how we do **not** run `!pip install .`)
 ```
 %cd /content
 !git clone https://github.com/olaviinha/magenta.git
