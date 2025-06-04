@@ -13,7 +13,6 @@
 # limitations under the License.
 
 """convert all files in a folder to jpg."""
-from __future__ import print_function
 
 import argparse
 import glob

@@ -14,9 +14,6 @@
 
 """Onset-focused model for piano and drum transcription, TPU compatible."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.contrib import rnn as contrib_rnn
 from magenta.contrib import training as contrib_training

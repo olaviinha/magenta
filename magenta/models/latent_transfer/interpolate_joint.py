@@ -19,9 +19,6 @@ images, as well as in other side of the model through paralleling,
 image-by-image transformation.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import importlib
 import os

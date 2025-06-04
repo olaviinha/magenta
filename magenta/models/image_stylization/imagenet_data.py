@@ -24,9 +24,6 @@ Methods of ImagenetData class:
 This file was taken nearly verbatim from the tensorflow/models GitHub repo.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import sys

@@ -14,9 +14,6 @@
 
 """Gold standard musical sequences."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 # pylint:disable=g-line-too-long,line-too-long
 _MARYLMB = (

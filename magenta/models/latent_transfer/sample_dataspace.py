@@ -19,9 +19,6 @@ This script provides sampling from VAE on dataspace trained using
 of model on dataspace.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import importlib
 import os

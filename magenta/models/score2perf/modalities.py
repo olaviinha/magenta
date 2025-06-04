@@ -14,9 +14,6 @@
 
 """Modality transformations used by Magenta and not in core Tensor2Tensor."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from tensor2tensor.layers import common_layers
 import tensorflow.compat.v1 as tf

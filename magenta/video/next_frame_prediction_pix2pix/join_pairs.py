@@ -17,7 +17,6 @@ The goal is to create pairs with a frame to the next frame
 it can match a real frame to a recursively generated frame
 for instance (r0001.png) with a real frame (f0002.png)
 """
-from __future__ import print_function
 
 import argparse
 import glob
