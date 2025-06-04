@@ -22,6 +22,9 @@ from absl import flags
 import attr
 from colorama import Fore
 from colorama import Style
+from absl import logging
+
+logging.basicConfig(level=logging.INFO)
 from magenta.models.onsets_frames_transcription.realtime import audio_recorder
 from magenta.models.onsets_frames_transcription.realtime import tflite_model
 import numpy as np
@@ -155,7 +158,7 @@ def result_collector(result_queue):
         Fore.LIGHTMAGENTA_EX + 'G#' + Style.RESET_ALL,
     ][n % 12]  #+ str(n//12)
 
-  print('Listening to results..')
+  logging.info('Listening to results..')
   # TODO(mtyka) Ensure serial stitching of results (no guarantee that
   # the blocks come in in order but they are all timestamped)
   while True:
@@ -169,8 +172,8 @@ def result_collector(result_queue):
         note = notes[i]
         is_frame = note[0] > 0.0
         notestr = notename(i, not is_frame)
-        print(notestr, end='')
-      print('|')
+        logging.info('%s', notestr)
+      logging.info('|')
 
 
 def main(argv):

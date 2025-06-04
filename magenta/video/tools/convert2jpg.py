@@ -14,10 +14,14 @@
 
 """convert all files in a folder to jpg."""
 
+import logging
+
 import argparse
 import glob
 import ntpath
 import os
+
+logging.basicConfig(level=logging.INFO)
 
 from PIL import Image
 
@@ -78,19 +82,19 @@ def convert2jpg(path_in, path_out, args):
     nothing
   """
   path = '{}/*'.format(path_in)
-  print('looking for all files in', path)
+  logging.info('looking for all files in %s', path)
   files = glob.glob(path)
   file_count = len(files)
-  print('found ', file_count, 'files')
+  logging.info('found %d files', file_count)
 
   i = 0
   for image_file in files:
     i += 1
     try:
       if ntpath.basename(image_file).split('.')[-1] in ['jpg', 'jpeg', 'JPG']:
-        print(i, '/', file_count, '  not converting file', image_file)
+        logging.info('%d / %d  not converting file %s', i, file_count, image_file)
         continue  # no need to convert
-      print(i, '/', file_count, '  convert file', image_file)
+      logging.info('%d / %d  convert file %s', i, file_count, image_file)
       img = Image.open(image_file)
       # print('file open')
       if args.xsize > 0:
@@ -110,13 +114,13 @@ def convert2jpg(path_in, path_out, args):
       basename = ntpath.basename(image_file).split('.')[0]
       filename = basename + '.jpg'
       file_out = os.path.join(path_out, filename)
-      print(i, '/', file_count, '  save file', file_out)
+      logging.info('%d / %d  save file %s', i, file_count, file_out)
       img.save(file_out, 'JPEG')
       if args.delete:
-        print('deleting', image_file)
+        logging.info('deleting %s', image_file)
         os.remove(image_file)
     except:  # pylint: disable=bare-except
-      print("""can't convert file""", image_file, 'to jpg :')
+      logging.warning("can't convert file %s to jpg :", image_file)
 
 if __name__ == '__main__':
   convert2jpg(ARGS.path_in, ARGS.path_out, ARGS)
