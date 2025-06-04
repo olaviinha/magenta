@@ -27,68 +27,69 @@ from magenta.models.shared import sequence_generator_bundle
 import note_seq
 from note_seq.protobuf import generator_pb2
 from note_seq.protobuf import music_pb2
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+from absl import app, flags, logging
 
-FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_string(
+FLAGS = flags.FLAGS
+flags.DEFINE_string(
     'run_dir', None,
     'Path to the directory where the latest checkpoint will be loaded from.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'bundle_file', None,
     'Path to the bundle file. If specified, this will take priority over '
     'run_dir, unless save_generator_bundle is True, in which case both this '
     'flag and run_dir are required')
-tf.app.flags.DEFINE_boolean(
+flags.DEFINE_boolean(
     'save_generator_bundle', False,
     'If true, instead of generating a sequence, will save this generator as a '
     'bundle file in the location specified by the bundle_file flag')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'bundle_description', None,
     'A short, human-readable text description of the bundle (e.g., training '
     'data, hyper parameters, etc.).')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'config', 'rnn-nade', 'Config to use. Ignored if bundle is provided.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'output_dir', '/tmp/pianoroll_rnn_nade/generated',
     'The directory where MIDI files will be saved to.')
-tf.app.flags.DEFINE_integer(
+flags.DEFINE_integer(
     'num_outputs', 10,
     'The number of tracks to generate. One MIDI file will be created for '
     'each.')
-tf.app.flags.DEFINE_integer(
+flags.DEFINE_integer(
     'num_steps', 128,
     'The total number of steps the generated track should be, priming '
     'track length + generated steps. Each step is a 16th of a bar.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'primer_pitches', '',
     'A string representation of a Python list of pitches that will be used as '
     'a starting chord with a quarter note duration. For example: '
     '"[60, 64, 67]"')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'primer_pianoroll', '', 'A string representation of a Python list of '
     '`note_seq.PianorollSequence` event values (tuples of active MIDI'
     'pitches for a sequence of steps). For example: '
     '"[(55,), (54,), (55, 53), (50,), (62, 52), (), (63, 55)]".')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'primer_midi', '',
     'The path to a MIDI file containing a polyphonic track that will be used '
     'as a priming track.')
-tf.app.flags.DEFINE_float(
+flags.DEFINE_float(
     'qpm', None,
     'The quarters per minute to play generated output at. If a primer MIDI is '
     'given, the qpm from that will override this flag. If qpm is None, qpm '
     'will default to 60.')
-tf.app.flags.DEFINE_integer(
+flags.DEFINE_integer(
     'beam_size', 1,
     'The beam size to use for beam search when generating tracks.')
-tf.app.flags.DEFINE_integer(
+flags.DEFINE_integer(
     'branch_factor', 1,
     'The branch factor to use for beam search when generating tracks.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'log', 'INFO',
     'The threshold for what messages will be logged DEBUG, INFO, WARN, ERROR, '
     'or FATAL.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'hparams', '',
     'Comma-separated list of `name=value` pairs. For each pair, the value of '
     'the hyperparameter named `name` is set to `value`. This mapping is merged '
@@ -131,7 +132,7 @@ def run_with_flags(generator):
     generator: The PianorollRnnNadeSequenceGenerator to use for generation.
   """
   if not FLAGS.output_dir:
-    tf.logging.fatal('--output_dir required')
+    logging.fatal('--output_dir required')
     return
   output_dir = os.path.expanduser(FLAGS.output_dir)
 
@@ -139,8 +140,8 @@ def run_with_flags(generator):
   if FLAGS.primer_midi:
     primer_midi = os.path.expanduser(FLAGS.primer_midi)
 
-  if not tf.gfile.Exists(output_dir):
-    tf.gfile.MakeDirs(output_dir)
+  if not tf.io.gfile.exists(output_dir):
+    tf.io.gfile.makedirs(output_dir)
 
   primer_sequence = None
   qpm = FLAGS.qpm if FLAGS.qpm else 60
@@ -166,7 +167,7 @@ def run_with_flags(generator):
     if primer_sequence.tempos and primer_sequence.tempos[0].qpm:
       qpm = primer_sequence.tempos[0].qpm
   else:
-    tf.logging.warning(
+    logging.warning(
         'No priming sequence specified. Defaulting to empty sequence.')
     primer_sequence = music_pb2.NoteSequence()
     primer_sequence.tempos.add().qpm = qpm
@@ -186,7 +187,7 @@ def run_with_flags(generator):
       end_time=generate_end_time)
 
   if generate_section.start_time >= generate_section.end_time:
-    tf.logging.fatal(
+    logging.fatal(
         'Priming sequence is longer than the total number of steps '
         'requested: Priming sequence length: %s, Total length '
         'requested: %s',
@@ -196,8 +197,8 @@ def run_with_flags(generator):
   generator_options.args['beam_size'].int_value = FLAGS.beam_size
   generator_options.args['branch_factor'].int_value = FLAGS.branch_factor
 
-  tf.logging.info('primer_sequence: %s', primer_sequence)
-  tf.logging.info('generator_options: %s', generator_options)
+  logging.info('primer_sequence: %s', primer_sequence)
+  logging.info('generator_options: %s', generator_options)
 
   # Make the generate request num_outputs times and save the output as midi
   # files.
@@ -210,13 +211,13 @@ def run_with_flags(generator):
     midi_path = os.path.join(output_dir, midi_filename)
     note_seq.sequence_proto_to_midi_file(generated_sequence, midi_path)
 
-  tf.logging.info('Wrote %d MIDI files to %s',
-                  FLAGS.num_outputs, output_dir)
+  logging.info('Wrote %d MIDI files to %s',
+               FLAGS.num_outputs, output_dir)
 
 
 def main(unused_argv):
   """Saves bundle or runs generator based on flags."""
-  tf.logging.set_verbosity(FLAGS.log)
+  logging.set_verbosity(FLAGS.log)
 
   bundle = get_bundle()
 
@@ -237,16 +238,15 @@ def main(unused_argv):
   if FLAGS.save_generator_bundle:
     bundle_filename = os.path.expanduser(FLAGS.bundle_file)
     if FLAGS.bundle_description is None:
-      tf.logging.warning('No bundle description provided.')
-    tf.logging.info('Saving generator bundle to %s', bundle_filename)
+      logging.warning('No bundle description provided.')
+    logging.info('Saving generator bundle to %s', bundle_filename)
     generator.create_bundle_file(bundle_filename, FLAGS.bundle_description)
   else:
     run_with_flags(generator)
 
 
 def console_entry_point():
-  tf.disable_v2_behavior()
-  tf.app.run(main)
+  app.run(main)
 
 
 if __name__ == '__main__':

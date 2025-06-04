@@ -23,10 +23,10 @@ import os
 from magenta.models.pianoroll_rnn_nade import pianoroll_rnn_nade_model
 from magenta.pipelines import pianoroll_pipeline
 from magenta.pipelines import pipeline
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+from absl import app, flags, logging
 
-flags = tf.app.flags
-FLAGS = tf.app.flags.FLAGS
+FLAGS = flags.FLAGS
 flags.DEFINE_string(
     'input', None,
     'TFRecord to read NoteSequence protos from.')
@@ -46,7 +46,7 @@ flags.DEFINE_string(
 
 
 def main(unused_argv):
-  tf.logging.set_verbosity(FLAGS.log)
+  logging.set_verbosity(FLAGS.log)
 
   pipeline_instance = pianoroll_pipeline.get_pipeline(
       min_steps=80,  # 5 measures
@@ -63,8 +63,7 @@ def main(unused_argv):
 
 
 def console_entry_point():
-  tf.disable_v2_behavior()
-  tf.app.run(main)
+  app.run(main)
 
 
 if __name__ == '__main__':
