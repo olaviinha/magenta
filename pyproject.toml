@@ -1,0 +1,125 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magenta"
+version = "2.1.4"
+description = "Use machine learning to create art and music"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [
+  {name = "Google Inc.", email = "magenta-discuss@gmail.com"}
+]
+keywords = ["tensorflow", "machine", "learning", "magenta", "music", "art"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Software Development :: Libraries",
+]
+
+# Dependencies from setup.py
+dependencies = [
+  "absl-py==1.2.0",
+  "dm-sonnet==2.0.0",
+  "scikit-image==0.19.3",
+  "imageio==2.20.0",
+  "librosa==0.10.0",
+  "matplotlib==3.5.2",
+  "mido==1.2.6",
+  "mir_eval==0.7",
+  "note-seq==0.0.3",
+  "numba==0.58.1",
+  "numpy==1.22",
+  "pillow==9.2.0",
+  "pretty_midi==0.2.9",
+  "pygtrie==2.5.0",
+  "python-rtmidi==1.5.8",
+  "scipy==1.9.2",
+  "six==1.16.0",
+  "sk-video==1.1.10",
+  "sox==1.4.1",
+  "tensorflow==2.12.0",
+  "tensorflow-datasets==4.6.0",
+  "tensorflow-probability==0.17.0",
+  "tf_slim==1.1.0",
+  "wheel==0.37.1",
+  "protobuf==3.20.0",
+  "pychord",
+]
+
+[project.optional-dependencies]
+beam = ["apache-beam[gcp] == 2.40.0"]
+onsets_frames_realtime = [
+  "pyaudio == 0.2.12",
+  "colorama == 0.4.5",
+  "tflite == 2.4.0",
+]
+test = [
+  "pylint == 2.14.5",
+  "pytest == 7.1.2",
+]
+
+[project.scripts]
+magenta_midi = "magenta.interfaces.midi.magenta_midi:console_entry_point"
+midi_clock = "magenta.interfaces.midi.midi_clock:console_entry_point"
+arbitrary_image_stylization_evaluate = "magenta.models.arbitrary_image_stylization.arbitrary_image_stylization_evaluate:console_entry_point"
+arbitrary_image_stylization_train = "magenta.models.arbitrary_image_stylization.arbitrary_image_stylization_train:console_entry_point"
+arbitrary_image_stylization_with_weights = "magenta.models.arbitrary_image_stylization.arbitrary_image_stylization_with_weights:console_entry_point"
+arbitrary_image_stylization_distill_mobilenet = "magenta.models.arbitrary_image_stylization.arbitrary_image_stylization_distill_mobilenet:console_entry_point"
+drums_rnn_create_dataset = "magenta.models.drums_rnn.drums_rnn_create_dataset:console_entry_point"
+drums_rnn_generate = "magenta.models.drums_rnn.drums_rnn_generate:console_entry_point"
+drums_rnn_train = "magenta.models.drums_rnn.drums_rnn_train:console_entry_point"
+image_stylization_create_dataset = "magenta.models.image_stylization.image_stylization_create_dataset:console_entry_point"
+image_stylization_evaluate = "magenta.models.image_stylization.image_stylization_evaluate:console_entry_point"
+image_stylization_finetune = "magenta.models.image_stylization.image_stylization_finetune:console_entry_point"
+image_stylization_train = "magenta.models.image_stylization.image_stylization_train:console_entry_point"
+image_stylization_transform = "magenta.models.image_stylization.image_stylization_transform:console_entry_point"
+improv_rnn_create_dataset = "magenta.models.improv_rnn.improv_rnn_create_dataset:console_entry_point"
+improv_rnn_generate = "magenta.models.improv_rnn.improv_rnn_generate:console_entry_point"
+improv_rnn_train = "magenta.models.improv_rnn.improv_rnn_train:console_entry_point"
+gansynth_train = "magenta.models.gansynth.gansynth_train:console_entry_point"
+gansynth_generate = "magenta.models.gansynth.gansynth_generate:console_entry_point"
+melody_rnn_create_dataset = "magenta.models.melody_rnn.melody_rnn_create_dataset:console_entry_point"
+melody_rnn_generate = "magenta.models.melody_rnn.melody_rnn_generate:console_entry_point"
+melody_rnn_train = "magenta.models.melody_rnn.melody_rnn_train:console_entry_point"
+music_vae_generate = "magenta.models.music_vae.music_vae_generate:console_entry_point"
+music_vae_train = "magenta.models.music_vae.music_vae_train:console_entry_point"
+nsynth_generate = "magenta.models.nsynth.wavenet.nsynth_generate:console_entry_point"
+nsynth_save_embeddings = "magenta.models.nsynth.wavenet.nsynth_save_embeddings:console_entry_point"
+onsets_frames_transcription_create_dataset = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_create_dataset:console_entry_point"
+onsets_frames_transcription_create_dataset_maps = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_create_dataset_maps:console_entry_point"
+onsets_frames_transcription_create_tfrecords = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_create_tfrecords:console_entry_point"
+onsets_frames_transcription_infer = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_infer:console_entry_point"
+onsets_frames_transcription_train = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_train:console_entry_point"
+onsets_frames_transcription_transcribe = "magenta.models.onsets_frames_transcription.onsets_frames_transcription_transcribe:console_entry_point"
+onsets_frames_transcription_realtime = "magenta.models.onsets_frames_transcription.realtime.onsets_frames_transcription_realtime:console_entry_point"
+performance_rnn_create_dataset = "magenta.models.performance_rnn.performance_rnn_create_dataset:console_entry_point"
+performance_rnn_generate = "magenta.models.performance_rnn.performance_rnn_generate:console_entry_point"
+performance_rnn_train = "magenta.models.performance_rnn.performance_rnn_train:console_entry_point"
+pianoroll_rnn_nade_create_dataset = "magenta.models.pianoroll_rnn_nade.pianoroll_rnn_nade_create_dataset:console_entry_point"
+pianoroll_rnn_nade_generate = "magenta.models.pianoroll_rnn_nade.pianoroll_rnn_nade_generate:console_entry_point"
+pianoroll_rnn_nade_train = "magenta.models.pianoroll_rnn_nade.pianoroll_rnn_nade_train:console_entry_point"
+polyphony_rnn_create_dataset = "magenta.models.polyphony_rnn.polyphony_rnn_create_dataset:console_entry_point"
+polyphony_rnn_generate = "magenta.models.polyphony_rnn.polyphony_rnn_generate:console_entry_point"
+polyphony_rnn_train = "magenta.models.polyphony_rnn.polyphony_rnn_train:console_entry_point"
+rl_tuner_train = "magenta.models.rl_tuner.rl_tuner_train:console_entry_point"
+sketch_rnn_train = "magenta.models.sketch_rnn.sketch_rnn_train:console_entry_point"
+convert_dir_to_note_sequences = "magenta.scripts.convert_dir_to_note_sequences:console_entry_point"
+t2t_datagen = "magenta.tensor2tensor.t2t_datagen:console_entry_point"
+t2t_decoder = "magenta.tensor2tensor.t2t_decoder:console_entry_point"
+t2t_trainer = "magenta.tensor2tensor.t2t_trainer:console_entry_point"
+
+[tool.setuptools]
+packages = {find = {}}
+include-package-data = true
+
+[tool.setuptools.package-data]
+magenta = ["models/image_stylization/evaluation_images/*.jpg"]
