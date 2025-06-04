@@ -19,9 +19,6 @@ of generative models that model the data. This file defines the joint model
 that models the transfer between latent spaces (z1, z2) of models on dataspace.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.models.latent_transfer import nn
 from six import iteritems

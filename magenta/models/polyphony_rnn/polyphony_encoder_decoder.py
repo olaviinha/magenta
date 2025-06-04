@@ -14,7 +14,6 @@
 
 """Classes for converting between polyphonic input and model input/output."""
 
-from __future__ import division
 
 from magenta.models.polyphony_rnn import polyphony_lib
 from magenta.models.polyphony_rnn.polyphony_lib import PolyphonicEvent

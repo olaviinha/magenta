@@ -14,7 +14,6 @@
 
 """Performance RNN generation code as a SequenceGenerator interface."""
 
-from __future__ import division
 
 import ast
 import functools

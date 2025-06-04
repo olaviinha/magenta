@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Defines the graph for sampling from Coconet."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import time
 

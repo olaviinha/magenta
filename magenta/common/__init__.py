@@ -14,7 +14,6 @@
 
 """Imports objects into the top-level common namespace."""
 
-from __future__ import absolute_import
 
 from .beam_search import beam_search
 from .nade import Nade

@@ -14,9 +14,6 @@
 
 """Run inference for onset conditioned model."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.models.onsets_frames_transcription import configs
 from magenta.models.onsets_frames_transcription import data

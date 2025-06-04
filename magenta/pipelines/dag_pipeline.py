@@ -30,9 +30,6 @@ type signature: Something that can be returned from Pipeline's `output_type`
     or `input_type`. A python class, or dictionary mapping names to classes.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import itertools
 

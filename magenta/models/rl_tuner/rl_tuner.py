@@ -24,9 +24,6 @@ algorithm can be switched using the 'algorithm' hyperparameter.
 For more information, please consult the README.md file in this directory.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import collections
 import os

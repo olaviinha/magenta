@@ -15,9 +15,6 @@
 """Generator and discriminator functions.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.models.gansynth.lib import data_normalizer
 from magenta.models.gansynth.lib import layers

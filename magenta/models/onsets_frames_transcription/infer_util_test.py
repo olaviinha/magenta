@@ -14,9 +14,6 @@
 
 """Tests for metrics."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.models.onsets_frames_transcription import infer_util
 

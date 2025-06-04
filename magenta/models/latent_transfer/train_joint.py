@@ -20,9 +20,6 @@ This script train the joint model defined in `model_joint.py` that transfers
 between latent space of generative models that model the data.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from functools import partial
 import importlib

@@ -14,9 +14,6 @@
 
 """SoX-based audio transform functions for the purpose of data augmentation."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import math
 import random
