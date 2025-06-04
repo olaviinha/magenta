@@ -25,6 +25,7 @@ REQUIRED_PACKAGES = [
     'scipy>=1.11',
     'six>=1.16',
     'sk-video>=1.1.10',
+    'soundfile==0.12.1',
     'sox>=1.4.1',
     'tensorflow>=2.15',
     'tensorflow-datasets>=4.9',

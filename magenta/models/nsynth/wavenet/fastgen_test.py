@@ -16,7 +16,7 @@
 import os
 
 from absl.testing import parameterized
-import librosa
+import soundfile
 from magenta.models.nsynth.wavenet import fastgen
 import numpy as np
 import tensorflow.compat.v1 as tf
@@ -68,7 +68,7 @@ class FastegenTest(parameterized.TestCase, tf.test.TestCase):
     for i in range(n_files):
       fname = os.path.join(test_dir, 'test_audio_{}.wav'.format(i))
       files.append(fname)
-      librosa.output.write_wav(fname, test_audio, sr=16000, norm=True)
+      soundfile.write(fname, test_audio, samplerate=16000)
     # Load the files
     batch_data = fastgen.load_batch_audio(files, sample_length=end_length)
     self.assertEqual(batch_data.shape, (n_files, end_length))
