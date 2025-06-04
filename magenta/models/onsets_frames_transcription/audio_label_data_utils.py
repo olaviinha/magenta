@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import bisect
+import logging
 import math
 
 import librosa
@@ -30,6 +31,8 @@ from note_seq.protobuf import music_pb2
 
 import numpy as np
 import tensorflow.compat.v1 as tf
+
+logging.basicConfig(level=logging.INFO)
 
 
 def velocity_range_from_sequence(ns):
@@ -275,7 +278,7 @@ def process_record(wav_data,
     else:
       samples = audio_io.wav_data_to_samples(wav_data, sample_rate)
   except audio_io.AudioIOReadError as e:
-    print('Exception %s', e)
+    logging.warning('Exception %s', e)
     return
   samples = librosa.util.normalize(samples, norm=np.inf)
 

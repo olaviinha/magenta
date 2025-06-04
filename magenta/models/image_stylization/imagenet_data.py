@@ -28,8 +28,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import logging
+
 import os
 import sys
+
+logging.basicConfig(level=logging.INFO)
 
 import tensorflow.compat.v1 as tf
 
@@ -64,21 +68,21 @@ class ImagenetData(object):
   def download_message(self):
     """Instruction to download and extract the tarball from Flowers website."""
 
-    print('Failed to find any ImageNet %s files'% self.subset)
-    print('')
-    print('If you have already downloaded and processed the data, then make '
-          'sure to set --imagenet_data_dir to point to the directory '
-          'containing the location of the sharded TFRecords.\n')
-    print('If you have not downloaded and prepared the ImageNet data in the '
-          'TFRecord format, you will need to do this at least once. This '
-          'process could take several hours depending on the speed of your '
-          'computer and network connection\n')
-    print('Please see '
-          'https://github.com/tensorflow/models/blob/master/research/slim/'
-          'datasets/download_and_convert_imagenet.sh '
-          'for a tool to build the ImageNet dataset.\n')
-    print('Note that the raw data size is 300 GB and the processed data size '
-          'is 150 GB. Please ensure you have at least 500GB disk space.')
+    logging.info('Failed to find any ImageNet %s files', self.subset)
+    logging.info('')
+    logging.info('If you have already downloaded and processed the data, then make '
+                 'sure to set --imagenet_data_dir to point to the directory '
+                 'containing the location of the sharded TFRecords.\n')
+    logging.info('If you have not downloaded and prepared the ImageNet data in the '
+                 'TFRecord format, you will need to do this at least once. This '
+                 'process could take several hours depending on the speed of your '
+                 'computer and network connection\n')
+    logging.info('Please see '
+                 'https://github.com/tensorflow/models/blob/master/research/slim/'
+                 'datasets/download_and_convert_imagenet.sh '
+                 'for a tool to build the ImageNet dataset.\n')
+    logging.info('Note that the raw data size is 300 GB and the processed data size '
+                 'is 150 GB. Please ensure you have at least 500GB disk space.')
 
   def available_subsets(self):
     """Returns the list of available subsets."""
@@ -95,14 +99,14 @@ class ImagenetData(object):
     """
     imagenet_data_dir = os.path.expanduser(FLAGS.imagenet_data_dir)
     if not tf.gfile.Exists(imagenet_data_dir):
-      print('%s does not exist!' % (imagenet_data_dir))
+      logging.warning('%s does not exist!', imagenet_data_dir)
       sys.exit(-1)
 
     tf_record_pattern = os.path.join(imagenet_data_dir, '%s-*' % self.subset)
     data_files = tf.gfile.Glob(tf_record_pattern)
     if not data_files:
-      print('No files found for dataset ImageNet/%s at %s' %
-            (self.subset, imagenet_data_dir))
+      logging.warning('No files found for dataset ImageNet/%s at %s',
+                      self.subset, imagenet_data_dir)
 
       self.download_message()
       sys.exit(-1)

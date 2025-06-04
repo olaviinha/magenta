@@ -123,7 +123,7 @@ def run(config_map):
       """Make sure each input returns exactly one example from the converter."""
       tensors = config.data_converter.to_tensors(input_ns).outputs
       if not tensors:
-        print(
+        logging.info(
             'MusicVAE configs have very specific input requirements. Could not '
             'extract any valid inputs from `%s`. Try another MIDI file.' % path)
         sys.exit()
@@ -135,7 +135,7 @@ def run(config_map):
         for i, ns in enumerate(config.data_converter.from_tensors(tensors)):
           note_seq.sequence_proto_to_midi_file(
               ns, basename.replace('*', '%03d' % i))
-        print(
+        logging.info(
             '%d valid inputs extracted from `%s`. Outputting these potential '
             'inputs as `%s`. Call script again with one of these instead.' %
             (len(tensors), path, basename))

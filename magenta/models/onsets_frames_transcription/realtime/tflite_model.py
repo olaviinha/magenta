@@ -14,7 +14,10 @@
 
 """Code for interacting with the TFLite model."""
 import importlib
+import logging
 import numpy as np
+
+logging.basicConfig(level=logging.INFO)
 
 try:
   tflite = importlib.import_module('tensorflow.compat.v1').lite
@@ -22,7 +25,7 @@ except ModuleNotFoundError:
   try:
     tflite = importlib.import_module('tflite_runtime.interpreter')
   except ModuleNotFoundError:
-    print('Either Tensorflow or tflite_runtime must be installed.')
+    logging.warning('Either Tensorflow or tflite_runtime must be installed.')
     raise
 
 

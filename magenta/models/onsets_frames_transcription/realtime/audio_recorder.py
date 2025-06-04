@@ -37,7 +37,7 @@ except ModuleNotFoundError:
     samplerate = importlib.import_module('samplerate')
     librosa = None
   except ModuleNotFoundError:
-    print('Either librosa or samplerate must be installed.')
+    logging.warning('Either librosa or samplerate must be installed.')
     raise
 
 
@@ -110,8 +110,8 @@ class AudioRecorder(object):
         0, self._device_index)
     if device_info.get('maxInputChannels') <= 0:
       raise ValueError('Audio device has insufficient input channels.')
-    print("Using audio device '%s' for index %d" %
-          (device_info['name'], device_info['index']))
+    logging.info("Using audio device '%s' for index %d",
+                 device_info['name'], device_info['index'])
     self._stream = self._audio.open(
         format=self.pyaudio_format,
         channels=self.num_channels,
@@ -148,12 +148,12 @@ class AudioRecorder(object):
 
   def _print_input_devices(self):
     info = self._audio.get_host_api_info_by_index(0)
-    print('\nInput microphone devices:')
+    logging.info('\nInput microphone devices:')
     for i in range(0, info.get('deviceCount')):
       device_info = self._audio.get_device_info_by_host_api_device_index(0, i)
       if device_info.get('maxInputChannels') <= 0:
         continue
-      print('  ID: ', i, ' - ', device_info.get('name'))
+      logging.info('  ID: %s - %s', i, device_info.get('name'))
 
   def _enqueue_raw_audio(self, in_data, *_):  # unused args to match expected
     try:

@@ -19,11 +19,15 @@ for instance (r0001.png) with a real frame (f0002.png)
 """
 from __future__ import print_function
 
+import logging
+
 import argparse
 import glob
 import ntpath
 import os
 from random import shuffle
+
+logging.basicConfig(level=logging.INFO)
 
 from PIL import Image
 
@@ -87,20 +91,20 @@ def main(_):
   """
   size = ARGS.size
   path = '{}/*.jpg'.format(ARGS.path_left)
-  print('looking for recursive img in', path)
+  logging.info('looking for recursive img in %s', path)
   l_list = glob.glob(path)
-  print('found ', len(l_list), 'for left list')
+  logging.info('found %d for left list', len(l_list))
   path = '{}/*.jpg'.format(ARGS.path_right)
-  print('looking for frames img in', path)
+  logging.info('looking for frames img in %s', path)
   r_list = glob.glob(path)
-  print('found ', len(r_list), 'for right list')
+  logging.info('found %d for right list', len(r_list))
   if ARGS.limit > 0:
     shuffle(l_list)
     l_list = l_list[:ARGS.limit]
   for left in l_list:
     match, i = is_match(left, r_list)
     if match:
-      print('load left', left, ' and right', match)
+      logging.info('load left %s and right %s', left, match)
       img_left = Image.open(left)
       img_right = Image.open(match)
 

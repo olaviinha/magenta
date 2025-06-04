@@ -20,10 +20,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import logging
+
 import argparse
 import glob
 import os
 import sys
+
+logging.basicConfig(level=logging.INFO)
 
 from PIL import Image
 import six
@@ -134,17 +138,17 @@ def main(_):
   Args:
     Nothing
   """
-  print('argument to expand', ARGS.video_in)
-  print('argument expanded', glob.glob(ARGS.video_in))
+  logging.info('argument to expand %s', ARGS.video_in)
+  logging.info('argument expanded %s', glob.glob(ARGS.video_in))
   video_count = 0
   for video_filename in glob.glob(ARGS.video_in):
-    print('start parsing', video_filename)
+    logging.info('start parsing %s', video_filename)
     data = skvideo.io.ffprobe(video_filename)['video']
     rate_str = six.ensure_str(data['@r_frame_rate']).split('/')
     rate = float(rate_str[0]) / float(rate_str[1])
-    print('detected frame rate:', rate)
+    logging.info('detected frame rate: %s', rate)
 
-    print('load frames:')
+    logging.info('load frames:')
     video = skvideo.io.vreader(video_filename)
     frame_count = 0
     file_count = 0
@@ -153,7 +157,7 @@ def main(_):
          ((frame_count-ARGS.offset)%ARGS.skip == 0) and \
          (frame_count/rate >= ARGS.from_s) and \
          (frame_count/rate <= ARGS.to_s or ARGS.to_s == -1):
-        print(frame_count,)
+        logging.info(frame_count)
         img = Image.fromarray(frame)
         if ARGS.crop:
           img = crop(img, ARGS.size)
@@ -168,7 +172,7 @@ def main(_):
                                   'f{:07d}.png'.format(file_number))
           img.save(file_out, 'PNG')
         else:
-          print('unrecognize format', ARGS.format_ext)
+          logging.warning('unrecognize format %s', ARGS.format_ext)
           sys.exit()
         file_count += 1
       frame_count += 1
