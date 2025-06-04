@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Defines shared constants used in transcription models."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import librosa
 

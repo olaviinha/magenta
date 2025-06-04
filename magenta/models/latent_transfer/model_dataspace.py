@@ -20,9 +20,6 @@ that explicitly model the data (x) in the latent space (z) and provide
 mechanism of encoding (x->z) and decoding (z->x).
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 from magenta.models.latent_transfer.common import dataset_is_mnist_family
 import numpy as np

@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Utilities for structured logging of intermediate values during sampling."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import contextlib
 import os

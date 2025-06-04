@@ -14,7 +14,6 @@
 
 """Utility functions for working with polyphonic sequences."""
 
-from __future__ import division
 
 import collections
 import copy

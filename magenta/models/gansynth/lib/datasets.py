@@ -14,9 +14,6 @@
 
 """Module contains a registry of dataset classes."""
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import collections
 from magenta.models.gansynth.lib import spectral_ops

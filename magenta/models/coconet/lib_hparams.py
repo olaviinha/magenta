@@ -13,9 +13,6 @@
 # limitations under the License.
 
 """Classes for defining hypermaters and model architectures."""
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import itertools as it
 import os

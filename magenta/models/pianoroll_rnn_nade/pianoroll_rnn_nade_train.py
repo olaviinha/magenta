@@ -20,10 +20,11 @@ import magenta
 from magenta.models.pianoroll_rnn_nade import pianoroll_rnn_nade_graph
 from magenta.models.pianoroll_rnn_nade import pianoroll_rnn_nade_model
 from magenta.models.shared import events_rnn_train
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+from absl import app, flags, logging
 
-FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_string('run_dir', '/tmp/rnn_nade/logdir/run1',
+FLAGS = flags.FLAGS
+flags.DEFINE_string('run_dir', '/tmp/rnn_nade/logdir/run1',
                            'Path to the directory where checkpoints and '
                            'summary events will be saved during training and '
                            'evaluation. Separate subdirectories for training '
@@ -32,34 +33,34 @@ tf.app.flags.DEFINE_string('run_dir', '/tmp/rnn_nade/logdir/run1',
                            'parent directory of `run_dir`. Point TensorBoard '
                            'to the parent directory of `run_dir` to see all '
                            'your runs.')
-tf.app.flags.DEFINE_string('config', 'rnn-nade', 'The config to use')
-tf.app.flags.DEFINE_string('sequence_example_file', '',
+flags.DEFINE_string('config', 'rnn-nade', 'The config to use')
+flags.DEFINE_string('sequence_example_file', '',
                            'Path to TFRecord file containing '
                            'tf.SequenceExample records for training or '
                            'evaluation.')
-tf.app.flags.DEFINE_integer('num_training_steps', 0,
+flags.DEFINE_integer('num_training_steps', 0,
                             'The the number of global training steps your '
                             'model should take before exiting training. '
                             'Leave as 0 to run until terminated manually.')
-tf.app.flags.DEFINE_integer('num_eval_examples', 0,
+flags.DEFINE_integer('num_eval_examples', 0,
                             'The number of evaluation examples your model '
                             'should process for each evaluation step.'
                             'Leave as 0 to use the entire evaluation set.')
-tf.app.flags.DEFINE_integer('summary_frequency', 10,
+flags.DEFINE_integer('summary_frequency', 10,
                             'A summary statement will be logged every '
                             '`summary_frequency` steps during training or '
                             'every `summary_frequency` seconds during '
                             'evaluation.')
-tf.app.flags.DEFINE_integer('num_checkpoints', 10,
+flags.DEFINE_integer('num_checkpoints', 10,
                             'The number of most recent checkpoints to keep in '
                             'the training directory. Keeps all if 0.')
-tf.app.flags.DEFINE_boolean('eval', False,
+flags.DEFINE_boolean('eval', False,
                             'If True, this process only evaluates the model '
                             'and does not update weights.')
-tf.app.flags.DEFINE_string('log', 'INFO',
+flags.DEFINE_string('log', 'INFO',
                            'The threshold for what messages will be logged '
                            'DEBUG, INFO, WARN, ERROR, or FATAL.')
-tf.app.flags.DEFINE_string(
+flags.DEFINE_string(
     'hparams', '',
     'Comma-separated list of `name=value` pairs. For each pair, the value of '
     'the hyperparameter named `name` is set to `value`. This mapping is merged '
@@ -67,16 +68,16 @@ tf.app.flags.DEFINE_string(
 
 
 def main(unused_argv):
-  tf.logging.set_verbosity(FLAGS.log)
+  logging.set_verbosity(FLAGS.log)
 
   if not FLAGS.run_dir:
-    tf.logging.fatal('--run_dir required')
+    logging.fatal('--run_dir required')
     return
   if not FLAGS.sequence_example_file:
-    tf.logging.fatal('--sequence_example_file required')
+    logging.fatal('--sequence_example_file required')
     return
 
-  sequence_example_file_paths = tf.gfile.Glob(
+  sequence_example_file_paths = tf.io.gfile.glob(
       os.path.expanduser(FLAGS.sequence_example_file))
   run_dir = os.path.expanduser(FLAGS.run_dir)
 
@@ -88,13 +89,13 @@ def main(unused_argv):
       mode, config, sequence_example_file_paths)
 
   train_dir = os.path.join(run_dir, 'train')
-  tf.gfile.MakeDirs(train_dir)
-  tf.logging.info('Train dir: %s', train_dir)
+  tf.io.gfile.makedirs(train_dir)
+  logging.info('Train dir: %s', train_dir)
 
   if FLAGS.eval:
     eval_dir = os.path.join(run_dir, 'eval')
-    tf.gfile.MakeDirs(eval_dir)
-    tf.logging.info('Eval dir: %s', eval_dir)
+    tf.io.gfile.makedirs(eval_dir)
+    logging.info('Eval dir: %s', eval_dir)
     num_batches = (
         (FLAGS.num_eval_examples or
          magenta.common.count_records(sequence_example_file_paths)) //
@@ -109,8 +110,7 @@ def main(unused_argv):
 
 
 def console_entry_point():
-  tf.disable_v2_behavior()
-  tf.app.run(main)
+  app.run(main)
 
 
 if __name__ == '__main__':

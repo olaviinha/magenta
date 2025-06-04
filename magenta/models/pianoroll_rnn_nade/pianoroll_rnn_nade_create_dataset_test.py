@@ -20,11 +20,10 @@ from magenta.models.shared import events_rnn_model
 from magenta.pipelines import pianoroll_pipeline
 import note_seq
 import note_seq.testing_lib
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
+from absl import flags
 
-tf.disable_v2_behavior()
-
-FLAGS = tf.app.flags.FLAGS
+FLAGS = flags.FLAGS
 
 
 class PianorollPipelineTest(tf.test.TestCase):

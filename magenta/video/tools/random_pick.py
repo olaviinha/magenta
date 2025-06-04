@@ -16,7 +16,6 @@
 
 Only useful if used with the --limit flag unless it will copy the whole folder
 """
-from __future__ import print_function
 
 import argparse
 import glob
