@@ -14,7 +14,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt-get -y install ffmpeg build-essential libasound2-dev libjack-dev sox
+        sudo apt-get -y install ffmpeg build-essential libasound2-dev libjack-dev sox python3-dev
+        python -m pip install --upgrade pip
         pip install -e .[test]
     - name: Test with pytest
       run: pytest --ignore=magenta/models/score2perf
