@@ -91,7 +91,7 @@ def initial_cell_state_from_embedding(cell, z, name=None):
   return tf.nest.pack_sequence_as(
       cell.zero_state(batch_size=z.shape[0], dtype=tf.float32),
       tf.split(
-          tf.layers.dense(
+          tf.keras.layers.dense(
               z,
               sum(flat_state_sizes),
               activation=tf.tanh,

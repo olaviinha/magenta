@@ -29,18 +29,19 @@ import os
 from note_seq import abc_parser
 from note_seq import midi_io
 from note_seq import musicxml_reader
+from absl import app, flags
 import tensorflow.compat.v1 as tf
 
-FLAGS = tf.app.flags.FLAGS
+FLAGS = flags.FLAGS
 
-tf.app.flags.DEFINE_string('input_dir', None,
+flags.DEFINE_string('input_dir', None,
                            'Directory containing files to convert.')
-tf.app.flags.DEFINE_string('output_file', None,
+flags.DEFINE_string('output_file', None,
                            'Path to output TFRecord file. Will be overwritten '
                            'if it already exists.')
-tf.app.flags.DEFINE_bool('recursive', False,
+flags.DEFINE_bool('recursive', False,
                          'Whether or not to recurse into subdirectories.')
-tf.app.flags.DEFINE_string('log', 'INFO',
+flags.DEFINE_string('log', 'INFO',
                            'The threshold for what messages will be logged '
                            'DEBUG, INFO, WARN, ERROR, or FATAL.')
 
@@ -235,7 +236,8 @@ def convert_directory(root_dir, output_file, recursive=False):
     convert_files(root_dir, '', writer, recursive)
 
 
-def main(unused_argv):
+def main(argv):
+  del argv
   tf.logging.set_verbosity(FLAGS.log)
 
   if not FLAGS.input_dir:
@@ -254,11 +256,6 @@ def main(unused_argv):
 
   convert_directory(input_dir, output_file, FLAGS.recursive)
 
-
-def console_entry_point():
-  tf.disable_v2_behavior()
-  tf.app.run(main)
-
-
 if __name__ == '__main__':
-  console_entry_point()
+  tf.disable_v2_behavior()
+  app.run(main)

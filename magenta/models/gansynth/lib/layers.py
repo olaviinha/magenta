@@ -247,7 +247,7 @@ def custom_conv2d(x,
                   reuse=None):
   """Custom conv2d layer.
 
-  In comparison with tf.layers.conv2d this implementation use the He initializer
+  In comparison with tf.keras.layers.conv2d this implementation use the He initializer
   to initialize convolutional kernel and the weight scaling trick (if
   `use_weight_scaling` is True) to equalize learning rates. See
   https://arxiv.org/abs/1710.10196 for more details.
@@ -273,7 +273,7 @@ def custom_conv2d(x,
   kernel_size = list(kernel_size)
 
   def _apply_kernel(kernel_shape, kernel_initializer):
-    return tf.layers.conv2d(
+    return tf.keras.layers.conv2d(
         x,
         filters=filters,
         kernel_size=kernel_shape[0:2],
@@ -301,7 +301,7 @@ def custom_dense(x,
                  reuse=None):
   """Custom dense layer.
 
-  In comparison with tf.layers.dense This implementation use the He
+  In comparison with tf.keras.layers.dense This implementation use the He
   initializer to initialize weights and the weight scaling trick
   (if `use_weight_scaling` is True) to equalize learning rates. See
   https://arxiv.org/abs/1710.10196 for more details.
@@ -319,10 +319,10 @@ def custom_dense(x,
   Returns:
     A `Tensor` where the last dimension has size `units`.
   """
-  x = tf.layers.flatten(x)
+  x = tf.keras.layers.flatten(x)
 
   def _apply_kernel(kernel_shape, kernel_initializer):
-    return tf.layers.dense(
+    return tf.keras.layers.dense(
         x,
         kernel_shape[1],
         use_bias=False,

@@ -614,7 +614,7 @@ class LayerRNNCell(rnn_cell.RNNCell):
     # Bypass RNNCell's variable capturing semantics for LayerRNNCell.
     # Instead, it is up to subclasses to provide a proper build
     # method.  See the class docstring for more details.
-    return tf.layers.Layer.__call__(
+    return tf.keras.layers.Layer.__call__(
         self, inputs, state, scope=scope, *args, **kwargs)
 
 
@@ -731,7 +731,7 @@ class LSTMBlockCell(LayerRNNCell):
         "scope": "lstm_cell"
     }
     # Inputs must be 2-dimensional.
-    self.input_spec = tf.layers.InputSpec(ndim=2)
+    self.input_spec = tf.keras.layers.InputSpec(ndim=2)
 
   @property
   def state_size(self):

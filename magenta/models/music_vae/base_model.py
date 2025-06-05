@@ -192,12 +192,12 @@ class MusicVAE(object):
       sequence = tf.concat([sequence, control_sequence], axis=-1)
     encoder_output = self.encoder.encode(sequence, sequence_length)
 
-    mu = tf.layers.dense(
+    mu = tf.keras.layers.dense(
         encoder_output,
         z_size,
         name='encoder/mu',
         kernel_initializer=tf.random_normal_initializer(stddev=0.001))
-    sigma = tf.layers.dense(
+    sigma = tf.keras.layers.dense(
         encoder_output,
         z_size,
         activation=tf.nn.softplus,
