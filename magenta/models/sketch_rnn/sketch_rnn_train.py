@@ -271,6 +271,9 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
   hps = model.hps
   start = time.time()
 
+  train_dataset = train_set.as_dataset(shuffle=True, repeat=True)
+  train_iter = iter(train_dataset)
+
   for _ in range(hps.num_steps):
 
     step = sess.run(model.global_step)
@@ -280,7 +283,8 @@ def train(sess, model, eval_model, train_set, valid_set, test_set):
     curr_kl_weight = (hps.kl_weight - (hps.kl_weight - hps.kl_weight_start) *
                       (hps.kl_decay_rate)**step)
 
-    _, x, s = train_set.random_batch()
+    x, s = next(train_iter)
+    x, s = x.numpy(), s.numpy()
     feed = {
         model.input_data: x,
         model.sequence_lengths: s,
@@ -462,7 +466,6 @@ def main(unused_argv):
 
 
 def console_entry_point():
-  tf.disable_v2_behavior()
   tf.app.run(main)
 
 
