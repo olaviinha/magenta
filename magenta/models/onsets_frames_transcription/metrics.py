@@ -68,18 +68,18 @@ def calculate_frame_metrics(frame_labels, frame_predictions):
   frame_labels_bool = tf.cast(frame_labels, tf.bool)
   frame_predictions_bool = tf.cast(frame_predictions, tf.bool)
 
-  frame_true_positives = tf.reduce_sum(tf.to_float(tf.logical_and(
+  frame_true_positives = tf.reduce_sum(tf.cast(tf.logical_and(
       tf.equal(frame_labels_bool, True),
-      tf.equal(frame_predictions_bool, True))))
-  frame_false_positives = tf.reduce_sum(tf.to_float(tf.logical_and(
+      tf.equal(frame_predictions_bool, True)), tf.float32))
+  frame_false_positives = tf.reduce_sum(tf.cast(tf.logical_and(
       tf.equal(frame_labels_bool, False),
-      tf.equal(frame_predictions_bool, True))))
-  frame_false_negatives = tf.reduce_sum(tf.to_float(tf.logical_and(
+      tf.equal(frame_predictions_bool, True)), tf.float32))
+  frame_false_negatives = tf.reduce_sum(tf.cast(tf.logical_and(
       tf.equal(frame_labels_bool, True),
-      tf.equal(frame_predictions_bool, False))))
+      tf.equal(frame_predictions_bool, False)), tf.float32))
   frame_accuracy = (
       tf.reduce_sum(
-          tf.to_float(tf.equal(frame_labels_bool, frame_predictions_bool))) /
+          tf.cast(tf.equal(frame_labels_bool, frame_predictions_bool), tf.float32)) /
       tf.cast(tf.size(frame_labels), tf.float32))
 
   frame_precision = tf.where(
@@ -313,7 +313,7 @@ def calculate_metrics(frame_probs,
    note_with_velocity_f1, note_with_offsets_precision, note_with_offsets_recall,
    note_with_offsets_f1, note_with_offsets_velocity_precision,
    note_with_offsets_velocity_recall, note_with_offsets_velocity_f1,
-   processed_frame_predictions) = tf.py_func(
+   processed_frame_predictions) = tf.py_function(
        functools.partial(
            _calculate_metrics_py,
            hparams=hparams,
@@ -352,7 +352,7 @@ def calculate_metrics(frame_probs,
        note_with_velocity_f1, note_with_offsets_precision,
        note_with_offsets_recall, note_with_offsets_f1,
        note_with_offsets_velocity_precision, note_with_offsets_velocity_recall,
-       note_with_offsets_velocity_f1, processed_frame_predictions) = tf.py_func(
+       note_with_offsets_velocity_f1, processed_frame_predictions) = tf.py_function(
            functools.partial(
                _calculate_metrics_py,
                hparams=hparams,

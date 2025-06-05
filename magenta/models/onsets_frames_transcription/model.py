@@ -334,7 +334,7 @@ def model_fn(features, labels, mode, params, config):
           min_pitch=constants.MIN_MIDI_PITCH)
       return sequence.SerializeToString()
 
-    sequence = tf.py_func(
+    sequence = tf.py_function(
         _predict,
         inp=[
             frame_probs[0],

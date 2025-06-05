@@ -169,7 +169,7 @@ def make_interpolated_latent_vectors(num_rows, num_columns, **kwargs):
   for _ in range(num_rows):
     z = tf.random_normal([2, kwargs['latent_vector_size']])
     r = tf.reshape(
-        tf.to_float(tf.range(num_columns)) / (num_columns - 1), [-1, 1])
+        tf.cast(tf.range(num_columns), tf.float32) / (num_columns - 1), [-1, 1])
     dz = z[1] - z[0]
     ans.append(z[0] + tf.stack([dz] * num_columns) * r)
   return tf.concat(ans, axis=0)

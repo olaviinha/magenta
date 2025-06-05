@@ -166,10 +166,11 @@ def compute_progress(current_image_id, stable_stage_num_images,
   progress_integer = tf.floordiv(capped_current_image_id, stage_num_images)
   progress_fraction = tf.maximum(
       0.0,
-      tf.to_float(
+      tf.cast(
           tf.mod(capped_current_image_id, stage_num_images) -
-          stable_stage_num_images) / tf.to_float(transition_stage_num_images))
-  return tf.to_float(progress_integer) + progress_fraction
+          stable_stage_num_images, tf.float32) /
+      tf.cast(transition_stage_num_images, tf.float32))
+  return tf.cast(progress_integer, tf.float32) + progress_fraction
 
 
 def compute_progress_from_time(train_time, num_resolutions,

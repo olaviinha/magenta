@@ -281,7 +281,7 @@ class SVGDecoder(t2t_model.T2TModel):
           dtype=tf.float32, time_major=False)
 
   def lstm_cell(self, hparams, train):
-    keep_prob = 1.0 - hparams.rec_dropout * tf.to_float(train)
+    keep_prob = 1.0 - hparams.rec_dropout * tf.cast(train, tf.float32)
 
     recurrent_dropout_cell = contrib_rnn.LayerNormBasicLSTMCell(
         hparams.hidden_size,

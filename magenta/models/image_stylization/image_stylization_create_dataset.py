@@ -77,7 +77,7 @@ def main(unused_argv):
       if FLAGS.compute_gram_matrices:
         with tf.Graph().as_default():
           style_end_points = learning.precompute_gram_matrices(
-              tf.expand_dims(tf.to_float(style_image), 0),
+              tf.expand_dims(tf.cast(style_image, tf.float32), 0),
               # We use 'pool5' instead of 'fc8' because a) fully-connected
               # layers are already too deep in the network to be useful for
               # style and b) they're quite expensive to store.

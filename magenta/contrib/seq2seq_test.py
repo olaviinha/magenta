@@ -492,7 +492,7 @@ class BasicDecoderTest(tf.test.TestCase):
     sample_fn = (
         lambda x: seq2seq.bernoulli_sample(logits=x, dtype=tf.bool))
     # The next inputs are a one-hot encoding of the sampled labels.
-    next_inputs_fn = tf.to_float
+    next_inputs_fn = lambda x: tf.cast(x, tf.float32)
     end_fn = lambda sample_ids: sample_ids[:, end_token]
 
     with self.session(use_gpu=True) as sess:

@@ -254,14 +254,14 @@ def crop_or_pad(waves, length, channels):
 
   # Force audio length.
   pad = tf.maximum(0, length - waves_shape[1])
-  right_pad = tf.to_int32(tf.to_float(pad) / 2.0)
+  right_pad = tf.to_int32(tf.cast(pad, tf.float32) / 2.0)
   left_pad = pad - right_pad
   waves = tf.pad(waves, [[0, 0], [left_pad, right_pad], [0, 0]])
   waves = waves[:, :length, :]
 
   # Force number of channels.
   num_repeats = tf.to_int32(
-      tf.ceil(tf.to_float(channels) / tf.to_float(waves_shape[2])))
+      tf.ceil(tf.cast(channels, tf.float32) / tf.cast(waves_shape[2], tf.float32)))
   waves = tf.tile(waves, [1, 1, num_repeats])[:, :, :channels]
 
   waves.set_shape([batch_size, length, channels])
