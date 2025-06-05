@@ -131,7 +131,7 @@ def wav_to_spec_op(wav_audio, hparams):
     assert hparams.spec_log_amplitude
     spec = tflite_compat_mel(wav_audio, hparams=hparams)
   else:
-    spec = tf.py_func(
+    spec = tf.py_function(
         functools.partial(wav_to_spec, hparams=hparams),
         [wav_audio],
         tf.float32,
@@ -177,7 +177,7 @@ def get_spectrogram_hash_op(spectrogram):
     spectrogram_hash = np.int64(zlib.adler32(spectrogram_serialized.getvalue()))
     spectrogram_serialized.close()
     return spectrogram_hash
-  spectrogram_hash = tf.py_func(get_spectrogram_hash, [spectrogram], tf.int64,
+  spectrogram_hash = tf.py_function(get_spectrogram_hash, [spectrogram], tf.int64,
                                 name='get_spectrogram_hash')
   spectrogram_hash.set_shape([])
   return spectrogram_hash
@@ -191,7 +191,7 @@ def wav_to_num_frames(wav_audio, frames_per_second):
 
 def wav_to_num_frames_op(wav_audio, frames_per_second):
   """Transforms a wav-encoded audio string into number of frames."""
-  res = tf.py_func(
+  res = tf.py_function(
       functools.partial(wav_to_num_frames, frames_per_second=frames_per_second),
       [wav_audio],
       tf.int32,
@@ -212,7 +212,7 @@ def transform_wav_data_op(wav_data_tensor, hparams, jitter_amount_sec):
 
     return [wav_data]
 
-  return tf.py_func(
+  return tf.py_function(
       transform_wav_data, [wav_data_tensor],
       tf.string,
       name='transform_wav_data_op')
@@ -241,7 +241,7 @@ def sequence_to_pianoroll_op(sequence_tensor, velocity_range_tensor, hparams):
     return (roll.active, roll.weights, roll.onsets, roll.onset_velocities,
             roll.offsets)
 
-  res, weighted_res, onsets, velocities, offsets = tf.py_func(
+  res, weighted_res, onsets, velocities, offsets = tf.py_function(
       sequence_to_pianoroll_fn, [sequence_tensor, velocity_range_tensor],
       [tf.float32, tf.float32, tf.float32, tf.float32, tf.float32],
       name='sequence_to_pianoroll_op')
@@ -261,7 +261,7 @@ def jitter_label_op(sequence_tensor, jitter_amount_sec):
     sequence = sequences_lib.shift_sequence_times(sequence, jitter_amount_sec)
     return sequence.SerializeToString()
 
-  return tf.py_func(jitter_label, [sequence_tensor], tf.string)
+  return tf.py_function(jitter_label, [sequence_tensor], tf.string)
 
 
 def truncate_note_sequence(sequence, truncate_secs):
@@ -296,7 +296,7 @@ def truncate_note_sequence_op(sequence_tensor, truncated_length_frames,
     sequence = music_pb2.NoteSequence.FromString(sequence_tensor)
     num_secs = num_frames / hparams_frames_per_second(hparams)
     return truncate_note_sequence(sequence, num_secs).SerializeToString()
-  res = tf.py_func(
+  res = tf.py_function(
       truncate,
       [sequence_tensor, truncated_length_frames],
       tf.string)
@@ -526,7 +526,7 @@ def input_tensors_to_model_input(
           reduce_mode='max',
           min_pitch=constants.MIN_MIDI_PITCH)
     if labels_dict['note_sequence'].dtype == tf.string:
-      labels_dict['note_sequence'] = tf.py_func(
+      labels_dict['note_sequence'] = tf.py_function(
           functools.partial(
               drum_mappings.map_sequences, mapping_name=hparams.drum_data_map),
           [labels_dict['note_sequence']],

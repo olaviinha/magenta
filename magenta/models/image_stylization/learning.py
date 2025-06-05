@@ -173,13 +173,13 @@ def total_variation_loss(stylized_inputs, total_variation_weight):
   height = shape[1]
   width = shape[2]
   channels = shape[3]
-  y_size = tf.to_float((height - 1) * width * channels)
-  x_size = tf.to_float(height * (width - 1) * channels)
+  y_size = tf.cast((height - 1, tf.float32) * width * channels)
+  x_size = tf.cast(height * (width - 1, tf.float32) * channels)
   y_loss = tf.nn.l2_loss(
       stylized_inputs[:, 1:, :, :] - stylized_inputs[:, :-1, :, :]) / y_size
   x_loss = tf.nn.l2_loss(
       stylized_inputs[:, :, 1:, :] - stylized_inputs[:, :, :-1, :]) / x_size
-  loss = (y_loss + x_loss) / tf.to_float(batch_size)
+  loss = (y_loss + x_loss) / tf.cast(batch_size, tf.float32)
   weighted_loss = loss * total_variation_weight
   return weighted_loss, {
       'total_variation_loss': loss,
@@ -190,7 +190,7 @@ def total_variation_loss(stylized_inputs, total_variation_weight):
 def gram_matrix(feature_maps):
   """Computes the Gram matrix for a set of feature maps."""
   batch_size, height, width, channels = tf.unstack(tf.shape(feature_maps))
-  denominator = tf.to_float(height * width)
+  denominator = tf.cast(height * width, tf.float32)
   feature_maps = tf.reshape(
       feature_maps, tf.stack([batch_size, height * width, channels]))
   matrix = tf.matmul(feature_maps, feature_maps, adjoint_a=True)

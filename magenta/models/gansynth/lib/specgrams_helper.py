@@ -202,7 +202,7 @@ class SpecgramsHelper(object):
     mag2 = tf.exp(2.0 * logmag)
     phase_angle = tf.cumsum(p * np.pi, axis=-2)
 
-    l2mel = tf.to_float(self._linear_to_mel_matrix())
+    l2mel = tf.cast(self._linear_to_mel_matrix(), tf.float32)
     logmelmag2 = self._safe_log(tf.tensordot(mag2, l2mel, 1))
     mel_phase_angle = tf.tensordot(phase_angle, l2mel, 1)
     mel_p = spectral_ops.instantaneous_frequency(mel_phase_angle)
@@ -227,7 +227,7 @@ class SpecgramsHelper(object):
     logmelmag2 = melspecgrams[:, :, :, 0]
     mel_p = melspecgrams[:, :, :, 1]
 
-    mel2l = tf.to_float(self._mel_to_linear_matrix())
+    mel2l = tf.cast(self._mel_to_linear_matrix(), tf.float32)
     mag2 = tf.tensordot(tf.exp(logmelmag2), mel2l, 1)
     logmag = 0.5 * self._safe_log(mag2)
     mel_phase_angle = tf.cumsum(mel_p * np.pi, axis=-2)

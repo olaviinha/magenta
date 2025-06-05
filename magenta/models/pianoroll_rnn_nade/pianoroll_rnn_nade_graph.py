@@ -270,15 +270,15 @@ def get_build_graph_fn(mode, config, sequence_example_file_paths=None):
     if mode in ('train', 'eval'):
       log_probs, cond_probs = rnn_nade.log_prob(inputs, lengths)
 
-      inputs_flat = tf.to_float(
-          magenta.common.flatten_maybe_padded_sequences(inputs, lengths))
-      predictions_flat = tf.to_float(tf.greater_equal(cond_probs, .5))
+      inputs_flat = tf.cast(
+          magenta.common.flatten_maybe_padded_sequences(inputs, lengths), tf.float32)
+      predictions_flat = tf.cast(tf.greater_equal(cond_probs, .5), tf.float32)
 
       if mode == 'train':
         loss = tf.reduce_mean(-log_probs)
         perplexity = tf.reduce_mean(tf.exp(log_probs))
-        correct_predictions = tf.to_float(
-            tf.equal(inputs_flat, predictions_flat))
+        correct_predictions = tf.cast(
+            tf.equal(inputs_flat, predictions_flat), tf.float32)
         accuracy = tf.reduce_mean(correct_predictions)
         precision = (tf.reduce_sum(inputs_flat * predictions_flat) /
                      tf.reduce_sum(predictions_flat))

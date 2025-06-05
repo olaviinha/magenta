@@ -52,7 +52,7 @@ def bottom_simple(x, model_hparams, vocab_size, name, reuse):
     # Add together the embeddings for each tuple position.
     ret = tf.add_n([
         tf.gather(var, x[:, :, :, i] + sum(vocab_size[:i])) *
-        tf.expand_dims(tf.to_float(tf.not_equal(x[:, :, :, i], 0)), -1)
+        tf.expand_dims(tf.cast(tf.not_equal(x[:, :, :, i], 0), tf.float32), -1)
         for i in range(len(vocab_size))
     ])
     if model_hparams.multiply_embedding_mode == 'sqrt_depth':

@@ -164,9 +164,9 @@ class CoconetGraph(object):
     # construct mask to identify zero padding that was introduced to
     # make the batch rectangular
     batch_duration = tf.shape(self.pianorolls)[1]
-    indices = tf.to_float(tf.range(batch_duration))
-    pad_mask = tf.to_float(
-        indices[None, :, None, None] < self.lengths[:, None, None, None])
+    indices = tf.cast(tf.range(batch_duration, tf.float32))
+    pad_mask = tf.cast(
+        indices[None, :, None, None] < self.lengths[:, None, None, None], tf.float32)
 
     # construct mask and its complement, respecting pad mask
     mask = pad_mask * self.masks
@@ -176,8 +176,8 @@ class CoconetGraph(object):
     # #timesteps * #variables per timestep
     variable_axis = 3 if self.hparams.use_softmax_loss else 2
     dd = (
-        self.lengths[:, None, None, None] * tf.to_float(
-            tf.shape(self.pianorolls)[variable_axis]))
+        self.lengths[:, None, None, None] * tf.cast(
+            tf.shape(self.pianorolls, tf.float32)[variable_axis]))
     reduced_dd = tf.reduce_sum(dd)
 
     # Compute numbers of variables to be predicted/conditioned on

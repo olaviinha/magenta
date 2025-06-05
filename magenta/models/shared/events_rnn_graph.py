@@ -169,10 +169,12 @@ def get_build_graph_fn(mode, config, sequence_example_file_paths=None):
                   :, logits_offsets[i]:logits_offsets[i + 1]], axis=1))
         predictions_flat = tf.stack(predictions, 1)
 
-      correct_predictions = tf.to_float(
-          tf.equal(labels_flat, predictions_flat))
-      event_positions = tf.to_float(tf.not_equal(labels_flat, no_event_label))
-      no_event_positions = tf.to_float(tf.equal(labels_flat, no_event_label))
+      correct_predictions = tf.cast(
+          tf.equal(labels_flat, predictions_flat), tf.float32)
+      event_positions = tf.cast(
+          tf.not_equal(labels_flat, no_event_label), tf.float32)
+      no_event_positions = tf.cast(
+          tf.equal(labels_flat, no_event_label), tf.float32)
 
       # Compute the total number of time steps across all sequences in the
       # batch. For some models this will be different from the number of RNN
@@ -182,7 +184,7 @@ def get_build_graph_fn(mode, config, sequence_example_file_paths=None):
         for labels, length in zip(batch_labels, lengths):
           num_steps += encoder_decoder.labels_to_num_steps(labels[:length])
         return np.float32(num_steps)
-      num_steps = tf.py_func(
+      num_steps = tf.py_function(
           batch_labels_to_num_steps, [labels, lengths], tf.float32)
 
       if mode == 'train':

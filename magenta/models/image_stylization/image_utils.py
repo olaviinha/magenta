@@ -107,7 +107,7 @@ def imagenet_inputs(batch_size, image_size, num_readers=1,
       image = _central_crop([image], image_size, image_size)[0]
       # pylint: enable=protected-access
       image.set_shape([image_size, image_size, 3])
-      image = tf.to_float(image) / 255.0
+      image = tf.cast(image, tf.float32) / 255.0
 
       images_and_labels.append([image, label_index])
 
@@ -208,7 +208,7 @@ def style_image_inputs(style_dataset_file, batch_size=None, image_size=None,
       else:
         image = _aspect_preserving_resize(image, image_size)
 
-    image = tf.to_float(image) / 255.0
+    image = tf.cast(image, tf.float32) / 255.0
 
     if batch_size is None:
       image = tf.expand_dims(image, 0)
@@ -346,8 +346,8 @@ def arbitrary_style_image_inputs(style_dataset_file,
           image = _aspect_preserving_resize(image, image_size)
           image_orig = image
 
-      image = tf.to_float(image) / 255.0
-      image_orig = tf.to_float(image_orig) / 255.0
+      image = tf.cast(image, tf.float32) / 255.0
+      image_orig = tf.cast(image_orig, tf.float32) / 255.0
 
       if batch_size is None:
         image = tf.expand_dims(image, 0)
@@ -438,7 +438,7 @@ def load_image(image_file, image_size=None):
     image = tf.image.resize_image_with_crop_or_pad(
         image, small_side, small_side)
     image = tf.image.resize_images(image, [image_size, image_size])
-  image = tf.to_float(image) / 255.0
+  image = tf.cast(image, tf.float32) / 255.0
 
   return tf.expand_dims(image, 0)
 
@@ -602,9 +602,9 @@ def _smallest_size_at_least(height, width, smallest_side):
   """
   smallest_side = tf.convert_to_tensor(smallest_side, dtype=tf.int32)
 
-  height = tf.to_float(height)
-  width = tf.to_float(width)
-  smallest_side = tf.to_float(smallest_side)
+  height = tf.cast(height, tf.float32)
+  width = tf.cast(width, tf.float32)
+  smallest_side = tf.cast(smallest_side, tf.float32)
 
   scale = tf.cond(tf.greater(height, width),
                   lambda: smallest_side / width,
@@ -731,7 +731,7 @@ def center_crop_resize_image(image, image_size):
   shape = tf.shape(image)
   small_side = tf.minimum(shape[0], shape[1])
   image = tf.image.resize_image_with_crop_or_pad(image, small_side, small_side)
-  image = tf.to_float(image) / 255.0
+  image = tf.cast(image, tf.float32) / 255.0
 
   image = tf.image.resize_images(image, tf.constant([image_size, image_size]))
 
@@ -750,6 +750,6 @@ def resize_image(image, image_size):
     with values in [0, 1].
   """
   image = _aspect_preserving_resize(image, image_size)
-  image = tf.to_float(image) / 255.0
+  image = tf.cast(image, tf.float32) / 255.0
 
   return tf.expand_dims(image, 0)

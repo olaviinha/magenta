@@ -128,7 +128,7 @@ def load_noteseqs(fp,
   # Deserialize protos
   # pylint: disable=g-long-lambda
   dataset = dataset.map(
-      lambda data: tf.py_func(
+      lambda data: tf.py_function(
           lambda x: _str_to_tensor(
               x, augment_stretch_bounds, augment_transpose_bounds),
           [data], (tf.string, tf.float32), stateful=False))

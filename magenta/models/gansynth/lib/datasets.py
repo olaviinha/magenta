@@ -83,7 +83,7 @@ class NSynthTfdsDataset(BaseDataset):
     pitches = sorted(pitch_counts.keys())
     counts = [pitch_counts[p] for p in pitches]
     indices = tf.reshape(
-        tf.multinomial(tf.log([tf.to_float(counts)]), batch_size), [batch_size])
+        tf.multinomial(tf.log([tf.cast(counts, tf.float32)]), batch_size), [batch_size])
     one_hot_labels = tf.one_hot(indices, depth=len(pitches))
     return one_hot_labels
 

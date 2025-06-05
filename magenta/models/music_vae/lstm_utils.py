@@ -142,26 +142,26 @@ def get_sampling_probability(hparams, is_training):
 
   schedule = hparams.sampling_schedule
   rate = hparams.sampling_rate
-  step = tf.to_float(tf.train.get_global_step())
+  step = tf.cast(tf.train.get_global_step(, tf.float32))
 
   if schedule == 'constant':
     if not 0 <= rate <= 1:
       raise ValueError(
           '`constant` sampling rate must be in the interval [0, 1]. Got %f.'
           % rate)
-    sampling_probability = tf.to_float(rate)
+    sampling_probability = tf.cast(rate, tf.float32)
   elif schedule == 'inverse_sigmoid':
     if rate < 1:
       raise ValueError(
           '`inverse_sigmoid` sampling rate must be at least 1. Got %f.' % rate)
-    k = tf.to_float(rate)
+    k = tf.cast(rate, tf.float32)
     sampling_probability = 1.0 - k / (k + tf.exp(step / k))
   elif schedule == 'exponential':
     if not 0 < rate < 1:
       raise ValueError(
           '`exponential` sampling rate must be in the interval (0, 1). Got %f.'
           % hparams.sampling_rate)
-    k = tf.to_float(rate)
+    k = tf.cast(rate, tf.float32)
     sampling_probability = 1.0 - tf.pow(k, step)
   else:
     raise ValueError('Invalid `sampling_schedule`: %s' % schedule)

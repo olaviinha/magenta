@@ -118,7 +118,7 @@ def _predict_sequences(frame_probs, onset_probs, frame_predictions,
 
   sequences = []
   for i in range(frame_predictions.shape[0]):
-    sequence = tf.py_func(
+    sequence = tf.py_function(
         functools.partial(predict_sequence, hparams=hparams),
         inp=[
             frame_probs[i],

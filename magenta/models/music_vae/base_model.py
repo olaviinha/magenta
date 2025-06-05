@@ -186,9 +186,9 @@ class MusicVAE(object):
     hparams = self.hparams
     z_size = hparams.z_size
 
-    sequence = tf.to_float(sequence)
+    sequence = tf.cast(sequence, tf.float32)
     if control_sequence is not None:
-      control_sequence = tf.to_float(control_sequence)
+      control_sequence = tf.cast(control_sequence, tf.float32)
       sequence = tf.concat([sequence, control_sequence], axis=-1)
     encoder_output = self.encoder.encode(sequence, sequence_length)
 
@@ -212,8 +212,8 @@ class MusicVAE(object):
     hparams = self.hparams
     batch_size = hparams.batch_size
 
-    input_sequence = tf.to_float(input_sequence)
-    output_sequence = tf.to_float(output_sequence)
+    input_sequence = tf.cast(input_sequence, tf.float32)
+    output_sequence = tf.cast(output_sequence, tf.float32)
 
     max_seq_len = tf.minimum(tf.shape(output_sequence)[1], hparams.max_seq_len)
 
@@ -221,7 +221,7 @@ class MusicVAE(object):
 
     if control_sequence is not None:
       control_depth = control_sequence.shape[-1]
-      control_sequence = tf.to_float(control_sequence)
+      control_sequence = tf.cast(control_sequence, tf.float32)
       control_sequence = control_sequence[:, :max_seq_len]
       # Shouldn't be necessary, but the slice loses shape information when
       # control depth is zero.
@@ -257,7 +257,7 @@ class MusicVAE(object):
     free_nats = hparams.free_bits * tf.math.log(2.0)
     kl_cost = tf.maximum(kl_div - free_nats, 0)
 
-    beta = ((1.0 - tf.pow(hparams.beta_rate, tf.to_float(self.global_step)))
+    beta = ((1.0 - tf.pow(hparams.beta_rate, tf.cast(self.global_step, tf.float32)))
             * hparams.max_beta)
     self.loss = tf.reduce_mean(r_loss) + beta * tf.reduce_mean(kl_cost)
 
@@ -292,7 +292,7 @@ class MusicVAE(object):
 
     hparams = self.hparams
     lr = ((hparams.learning_rate - hparams.min_learning_rate) *
-          tf.pow(hparams.decay_rate, tf.to_float(self.global_step)) +
+          tf.pow(hparams.decay_rate, tf.cast(self.global_step, tf.float32)) +
           hparams.min_learning_rate)
 
     optimizer = tf.train.AdamOptimizer(lr)

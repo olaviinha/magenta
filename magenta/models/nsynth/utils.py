@@ -388,7 +388,7 @@ def tf_specgram(audio,
                 dphase=True,
                 mag_only=False):
   """Specgram tensorflow op (uses pyfunc)."""
-  return tf.py_func(batch_specgram, [
+  return tf.py_function(batch_specgram, [
       audio, n_fft, hop_length, mask, log_mag, re_im, dphase, mag_only
   ], tf.float32)
 
@@ -410,7 +410,7 @@ def tf_ispecgram(spec,
     x = tf.concat([spec, tf.zeros([dims[0], 1, dims[2], dims[3]])], 1)
   else:
     x = spec
-  audio = tf.py_func(batch_ispecgram, [
+  audio = tf.py_function(batch_ispecgram, [
       x, n_fft, hop_length, mask, log_mag, re_im, dphase, mag_only, num_iters
   ], tf.float32)
   return audio
@@ -588,10 +588,10 @@ def softmax_summaries(loss, logits, one_hot_labels, name="softmax"):
 
   in_top_1 = tf.nn.in_top_k(logits, one_hot_labels, 1)
   tf.summary.scalar(name + "_precision@1",
-                    tf.reduce_mean(tf.to_float(in_top_1)))
+                    tf.reduce_mean(tf.cast(in_top_1, tf.float32)))
   in_top_5 = tf.nn.in_top_k(logits, one_hot_labels, 5)
   tf.summary.scalar(name + "_precision@5",
-                    tf.reduce_mean(tf.to_float(in_top_5)))
+                    tf.reduce_mean(tf.cast(in_top_5, tf.float32)))
 
 
 def calculate_l2_and_summaries(predicted_vectors, true_vectors, name):

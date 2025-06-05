@@ -210,7 +210,7 @@ class Nade(object):
       cond_p_i, cond_l_i = self._cond_prob(a, w_dec_i, b_dec_i)
 
       if temperature is None:
-        v_i = tf.to_float(tf.greater_equal(cond_p_i, 0.5))
+        v_i = tf.cast(tf.greater_equal(cond_p_i, 0.5, tf.float32))
       else:
         bernoulli = tfp.distributions.Bernoulli(
             logits=cond_l_i / temperature, dtype=tf.float32)
