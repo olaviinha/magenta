@@ -65,14 +65,14 @@ class RnnNade(object):
   def __init__(self, rnn_cell, num_dims, num_hidden):
     self._num_dims = num_dims
     self._rnn_cell = rnn_cell
-    self._fc_layer = tf.layers.Dense(units=num_dims + num_hidden)
+    self._fc_layer = tf.keras.layers.Dense(units=num_dims + num_hidden)
     self._nade = Nade(num_dims, num_hidden)
 
   def _get_rnn_zero_state(self, batch_size):
     """Return a tensor or tuple of tensors for an initial rnn state."""
     return self._rnn_cell.zero_state(batch_size, tf.float32)
 
-  class SampleNadeLayer(tf.layers.Layer):
+  class SampleNadeLayer(tf.keras.layers.Layer):
     """Layer that computes samples from a NADE."""
 
     def __init__(self, nade, name=None, **kwargs):

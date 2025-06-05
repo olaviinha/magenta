@@ -136,7 +136,7 @@ def real_svg_top(body_output, unused_targets, model_hparams, unused_vocab_size,
 
   # the 'hard' option is meant to be used if 'top' is called within body
   with tf.variable_scope('real_top', reuse=tf.AUTO_REUSE):
-    ret = tf.layers.dense(body_output, nout, name='top')
+    ret = tf.keras.layers.dense(body_output, nout, name='top')
     batch_size = common_layers.shape_list(ret)[0]
 
     if hard or model_hparams.mode == tf_estimator.ModeKeys.PREDICT:

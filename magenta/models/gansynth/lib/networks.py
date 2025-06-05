@@ -354,7 +354,7 @@ def generator(z,
     with tf.variable_scope(block_name(1)):
       if simple_arch:
         x_shape = tf.shape(x)
-        x = tf.layers.dense(x, start_h*start_w*num_filters_fn(1),
+        x = tf.keras.layers.dense(x, start_h*start_w*num_filters_fn(1),
                             kernel_initializer=he_init)
         x = tf.nn.relu(x)
         x = tf.reshape(x, [x_shape[0], start_h, start_w, num_filters_fn(1)])
@@ -378,7 +378,7 @@ def generator(z,
     for block_id in range(2, num_blocks + 1):
       with tf.variable_scope(block_name(block_id)):
         if simple_arch:
-          x = tf.layers.conv2d_transpose(
+          x = tf.keras.layers.conv2d_transpose(
               x,
               num_filters_fn(block_id),
               kernel_size=kernel_size,
@@ -397,7 +397,7 @@ def generator(z,
       with tf.variable_scope(block_name(block_id)):
         if simple_arch:
           lod = lods[block_id - 1]
-          lod = tf.layers.conv2d(
+          lod = tf.keras.layers.conv2d(
               lod,
               colors,
               kernel_size=1,
@@ -491,7 +491,7 @@ def discriminator(x,
         lod = resolution_schedule.downscale(x0, scale)
         end_points['downscaled_rgb_{}'.format(block_id)] = lod
         if simple_arch:
-          lod = tf.layers.conv2d(
+          lod = tf.keras.layers.conv2d(
               lod,
               num_filters_fn(block_id),
               kernel_size=1,
@@ -511,7 +511,7 @@ def discriminator(x,
     for block_id in range(num_blocks, 1, -1):
       with tf.variable_scope(block_name(block_id)):
         if simple_arch:
-          x = tf.layers.conv2d(
+          x = tf.keras.layers.conv2d(
               x,
               num_filters_fn(block_id-1),
               strides=strides,
@@ -531,7 +531,7 @@ def discriminator(x,
       x = layers.scalar_concat(x, layers.minibatch_mean_stddev(x))
       if simple_arch:
         x = tf.reshape(x, [tf.shape(x)[0], -1])  # flatten
-        x = tf.layers.dense(x, num_filters_fn(0), name='last_conv',
+        x = tf.keras.layers.dense(x, num_filters_fn(0), name='last_conv',
                             kernel_initializer=he_init)
         x = tf.reshape(x, [tf.shape(x)[0], 1, 1, num_filters_fn(0)])
         x = tf.nn.relu(x)
@@ -541,7 +541,7 @@ def discriminator(x,
                     num_filters_fn(0), 'VALID')
       end_points['last_conv'] = x
       if simple_arch:
-        logits = tf.layers.dense(x, 1, name='logits',
+        logits = tf.keras.layers.dense(x, 1, name='logits',
                                  kernel_initializer=he_init)
       else:
         logits = layers.custom_dense(x=x, units=1, scope='logits')

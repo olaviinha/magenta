@@ -226,7 +226,7 @@ class BaseLstmDecoder(base_model.BaseDecoder):
     self._sampling_probability = lstm_utils.get_sampling_probability(
         hparams, is_training)
     self._output_depth = output_depth
-    self._output_layer = tf.layers.Dense(
+    self._output_layer = tf.keras.layers.Dense(
         output_depth, name='output_projection')
     self._dec_cell = lstm_utils.rnn_cell(
         hparams.dec_rnn_size, hparams.dropout_keep_prob,
@@ -782,7 +782,7 @@ class MultiLabelRnnNadeDecoder(BaseLstmDecoder):
     super(MultiLabelRnnNadeDecoder, self).build(
         hparams, output_depth, is_training)
     # Overwrite output layer for NADE parameterization.
-    self._output_layer = tf.layers.Dense(
+    self._output_layer = tf.keras.layers.Dense(
         self._nade.num_hidden + output_depth, name='output_projection')
 
   def _flat_reconstruction_loss(self, flat_x_target, flat_rnn_output):
