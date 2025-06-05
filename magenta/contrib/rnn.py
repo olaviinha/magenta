@@ -15,10 +15,22 @@
 """Forked classes and functions from `tf.contrib.rnn`."""
 import tensorflow.compat.v1 as tf
 import tf_slim
+import collections
 
 from tensorflow.python.ops import gen_nn_ops  # pylint:disable=g-direct-tensorflow-import
 
 rnn_cell = tf.nn.rnn_cell
+
+
+class CompatRNNCell(tf.keras.layers.AbstractRNNCell):
+  """Minimal wrapper over `tf.keras.layers.AbstractRNNCell`."""
+
+  def zero_state(self, batch_size, dtype):
+    return tf.nest.map_structure(
+        lambda s: tf.zeros([batch_size, s], dtype=dtype), self.state_size)
+
+
+LSTMStateTuple = collections.namedtuple('LSTMStateTuple', ['c', 'h'])
 
 _BIAS_VARIABLE_NAME = "bias"
 _WEIGHTS_VARIABLE_NAME = "kernel"
@@ -74,84 +86,43 @@ def assert_like_rnncell(cell_name, cell):
         cell_name, cell, ", ".join(errors)))
 
 
-class _Linear(object):  # pylint:disable=g-classes-have-attributes
-  """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
+class _Linear(tf.keras.layers.Layer):  # pylint:disable=g-classes-have-attributes
+  """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable."""
 
-  Args:
-    args: a 2D Tensor or a list of 2D, batch, n, Tensors.
-    output_size: int, second dimension of weight variable.
-    dtype: data type for variables.
-    build_bias: boolean, whether to build a bias variable.
-    bias_initializer: starting value to initialize the bias
-      (default is all zeros).
-    kernel_initializer: starting value to initialize the weight.
-
-  Raises:
-    ValueError: if inputs_shape is wrong.
-  """
-
-  def __init__(self,
-               args,
-               output_size,
-               build_bias,
-               bias_initializer=None,
-               kernel_initializer=None):
+  def __init__(self, output_size, build_bias, **kwargs):
+    super().__init__(**kwargs)
+    self._output_size = output_size
     self._build_bias = build_bias
+    self._is_sequence = False
 
-    if args is None or (_is_sequence(args) and not args):
-      raise ValueError("`args` must be specified")
-    if not _is_sequence(args):
-      args = [args]
-      self._is_sequence = False
-    else:
+  def build(self, input_shape):
+    if isinstance(input_shape, (list, tuple)):
+      total_arg_size = sum(int(s[-1]) for s in input_shape)
       self._is_sequence = True
+    else:
+      total_arg_size = int(input_shape[-1])
+      self._is_sequence = False
+    self._kernel = self.add_weight(
+        _WEIGHTS_VARIABLE_NAME,
+        shape=[total_arg_size, self._output_size])
+    if self._build_bias:
+      self._biases = self.add_weight(
+          _BIAS_VARIABLE_NAME,
+          shape=[self._output_size],
+          initializer=tf.zeros_initializer())
+    super().build(input_shape)
 
-    # Calculate the total size of arguments on dimension 1.
-    total_arg_size = 0
-    shapes = [a.get_shape() for a in args]
-    for shape in shapes:
-      if shape.ndims != 2:
-        raise ValueError("linear is expecting 2D arguments: %s" % shapes)
-      if shape[1] is None:
-        raise ValueError("linear expects shape[1] to be provided for shape %s, "
-                         "but saw %s" % (shape, shape[1]))
-      else:
-        total_arg_size += int(shape[1])
-
-    dtype = [a.dtype for a in args][0]
-
-    scope = tf.get_variable_scope()
-    with tf.variable_scope(scope) as outer_scope:
-      self._weights = tf.get_variable(
-          _WEIGHTS_VARIABLE_NAME, [total_arg_size, output_size],
-          dtype=dtype,
-          initializer=kernel_initializer)
-      if build_bias:
-        with tf.variable_scope(outer_scope) as inner_scope:
-          inner_scope.set_partitioner(None)
-          if bias_initializer is None:
-            bias_initializer = tf.constant_initializer(0.0, dtype=dtype)
-          self._biases = tf.get_variable(
-              _BIAS_VARIABLE_NAME, [output_size],
-              dtype=dtype,
-              initializer=bias_initializer)
-
-  def __call__(self, args):
+  def call(self, args):
     if not self._is_sequence:
       args = [args]
-
-    if len(args) == 1:
-      res = tf.matmul(args[0], self._weights)
-    else:
-      # Explicitly creating a one for a minor performance improvement.
-      one = tf.constant(1, dtype=tf.int32)
-      res = tf.matmul(tf.concat(args, one), self._weights)
+    inputs = args[0] if len(args) == 1 else tf.concat(args, axis=1)
+    res = tf.matmul(inputs, self._kernel)
     if self._build_bias:
       res = tf.nn.bias_add(res, self._biases)
     return res
 
 
-class InputProjectionWrapper(rnn_cell.RNNCell):
+class InputProjectionWrapper(CompatRNNCell):
   """Operator adding an input projection to the given cell.
 
   Note: in many cases it may be more efficient to not use this wrapper,
@@ -179,7 +150,7 @@ class InputProjectionWrapper(rnn_cell.RNNCell):
     Raises:
       TypeError: if cell is not an RNNCell.
     """
-    super(InputProjectionWrapper, self).__init__(_reuse=reuse)
+    super(InputProjectionWrapper, self).__init__(name="InputProjectionWrapper")
     if input_size is not None:
       tf.logging.warn("%s: The input_size parameter is deprecated.", self)
     assert_like_rnncell("cell", cell)
@@ -204,14 +175,14 @@ class InputProjectionWrapper(rnn_cell.RNNCell):
     """Run the input projection and then the cell."""
     # Default scope: "InputProjectionWrapper"
     if self._linear is None:
-      self._linear = _Linear(inputs, self._num_proj, True)
+      self._linear = _Linear(self._num_proj, True)
     projected = self._linear(inputs)
     if self._activation:
       projected = self._activation(projected)
     return self._cell(projected, state)
 
 
-class AttentionCellWrapper(rnn_cell.RNNCell):
+class AttentionCellWrapper(CompatRNNCell):
   """Basic attention cell wrapper.
 
   Implementation based on https://arxiv.org/abs/1601.06733.
@@ -250,7 +221,7 @@ class AttentionCellWrapper(rnn_cell.RNNCell):
       ValueError: if cell returns a state tuple but the flag
           `state_is_tuple` is `False` or if attn_length is zero or less.
     """
-    super(AttentionCellWrapper, self).__init__(_reuse=reuse)
+    super(AttentionCellWrapper, self).__init__(name="AttentionCellWrapper")
     assert_like_rnncell("cell", cell)
     if _is_sequence(cell.state_size) and not state_is_tuple:
       raise ValueError(
@@ -277,6 +248,8 @@ class AttentionCellWrapper(rnn_cell.RNNCell):
     self._linear1 = None
     self._linear2 = None
     self._linear3 = None
+    self._k = None
+    self._v = None
 
   @property
   def state_size(self):
@@ -309,7 +282,7 @@ class AttentionCellWrapper(rnn_cell.RNNCell):
     if input_size is None:
       input_size = inputs.get_shape().as_list()[1]
     if self._linear1 is None:
-      self._linear1 = _Linear([inputs, attns], input_size, True)
+      self._linear1 = _Linear(input_size, True)
     inputs = self._linear1([inputs, attns])
     cell_output, new_state = self._cell(inputs, state)
     if self._state_is_tuple:
@@ -319,7 +292,7 @@ class AttentionCellWrapper(rnn_cell.RNNCell):
     new_attns, new_attn_states = self._attention(new_state_cat, attn_states)
     with tf.variable_scope("attn_output_projection"):
       if self._linear2 is None:
-        self._linear2 = _Linear([cell_output, new_attns], self._attn_size, True)
+        self._linear2 = _Linear(self._attn_size, True)
       output = self._linear2([cell_output, new_attns])
     new_attn_states = tf.concat(
         [new_attn_states, tf.expand_dims(output, 1)], 1)
@@ -337,14 +310,20 @@ class AttentionCellWrapper(rnn_cell.RNNCell):
     tanh = tf.math.tanh
 
     with tf.variable_scope("attention"):
-      k = tf.get_variable("attn_w",
-                          [1, 1, self._attn_size, self._attn_vec_size])
-      v = tf.get_variable("attn_v", [self._attn_vec_size])
+      if self._k is None:
+        self._k = self.add_weight(
+            "attn_w",
+            shape=[1, 1, self._attn_size, self._attn_vec_size])
+        self._v = self.add_weight(
+            "attn_v",
+            shape=[self._attn_vec_size])
+      k = self._k
+      v = self._v
       hidden = tf.reshape(attn_states,
                           [-1, self._attn_length, 1, self._attn_size])
       hidden_features = conv2d(hidden, k, [1, 1, 1, 1], "SAME")
       if self._linear3 is None:
-        self._linear3 = _Linear(query, self._attn_vec_size, True)
+        self._linear3 = _Linear(self._attn_vec_size, True)
       y = self._linear3(query)
       y = tf.reshape(y, [-1, 1, 1, self._attn_vec_size])
       s = reduce_sum(v * tanh(hidden_features + y), [2, 3])
@@ -576,7 +555,7 @@ def _lstm_block_cell(x,
       name=name)
 
 
-class LayerRNNCell(rnn_cell.RNNCell):
+class LayerRNNCell(CompatRNNCell):
   """Subclass of RNNCells that act like proper `tf.Layer` objects.
 
   For backwards compatibility purposes, most `RNNCell` instances allow their
@@ -717,7 +696,7 @@ class LSTMBlockCell(LayerRNNCell):
       When restoring from CudnnLSTM-trained checkpoints, must use
       CudnnCompatibleLSTMBlockCell instead.
     """
-    super(LSTMBlockCell, self).__init__(_reuse=reuse, dtype=dtype, name=name)
+    super(LSTMBlockCell, self).__init__(dtype=dtype, name=name)
     self._num_units = num_units
     self._forget_bias = forget_bias
     self._use_peephole = use_peephole
@@ -735,7 +714,7 @@ class LSTMBlockCell(LayerRNNCell):
 
   @property
   def state_size(self):
-    return rnn_cell.LSTMStateTuple(self._num_units, self._num_units)
+    return LSTMStateTuple(self._num_units, self._num_units)
 
   @property
   def output_size(self):
@@ -746,15 +725,17 @@ class LSTMBlockCell(LayerRNNCell):
       raise ValueError(
           "Expecting inputs_shape[1] to be set: %s" % str(inputs_shape))
     input_size = int(inputs_shape[1])
-    self._kernel = self.add_variable(
-        self._names["W"], [input_size + self._num_units, self._num_units * 4])
-    self._bias = self.add_variable(
-        self._names["b"], [self._num_units * 4],
+    self._kernel = self.add_weight(
+        self._names["W"],
+        shape=[input_size + self._num_units, self._num_units * 4])
+    self._bias = self.add_weight(
+        self._names["b"],
+        shape=[self._num_units * 4],
         initializer=tf.constant_initializer(0.0))
     if self._use_peephole:
-      self._w_i_diag = self.add_variable(self._names["wci"], [self._num_units])
-      self._w_f_diag = self.add_variable(self._names["wcf"], [self._num_units])
-      self._w_o_diag = self.add_variable(self._names["wco"], [self._num_units])
+      self._w_i_diag = self.add_weight(self._names["wci"], [self._num_units])
+      self._w_f_diag = self.add_weight(self._names["wcf"], [self._num_units])
+      self._w_o_diag = self.add_weight(self._names["wco"], [self._num_units])
 
     self.built = True
 
@@ -784,11 +765,11 @@ class LSTMBlockCell(LayerRNNCell):
         cell_clip=self._cell_clip,
         use_peephole=self._use_peephole)
 
-    new_state = rnn_cell.LSTMStateTuple(cs, h)
+    new_state = LSTMStateTuple(cs, h)
     return h, new_state
 
 
-class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
+class LayerNormBasicLSTMCell(CompatRNNCell):
   """LSTM unit with layer normalization and recurrent dropout.
 
   This class adds layer normalization and recurrent dropout to a
@@ -839,7 +820,7 @@ class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
         in an existing scope.  If not `True`, and the existing scope already has
         the given variables, an error is raised.
     """
-    super(LayerNormBasicLSTMCell, self).__init__(_reuse=reuse)
+    super(LayerNormBasicLSTMCell, self).__init__(name="LayerNormBasicLSTMCell")
 
     if input_size is not None:
       tf.logging.warn("%s: The input_size parameter is deprecated.", self)
@@ -853,10 +834,13 @@ class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
     self._norm_gain = norm_gain
     self._norm_shift = norm_shift
     self._reuse = reuse
+    self._norm_vars = {}
+    self._kernel = None
+    self._bias = None
 
   @property
   def state_size(self):
-    return rnn_cell.LSTMStateTuple(self._num_units, self._num_units)
+    return LSTMStateTuple(self._num_units, self._num_units)
 
   @property
   def output_size(self):
@@ -864,24 +848,32 @@ class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
 
   def _norm(self, inp, scope, dtype=tf.float32):
     shape = inp.get_shape()[-1:]
-    gamma_init = tf.constant_initializer(self._norm_gain)
-    beta_init = tf.constant_initializer(self._norm_shift)
-    with tf.variable_scope(scope):
-      # Initialize beta and gamma for use by layer_norm.
-      tf.get_variable("gamma", shape=shape, initializer=gamma_init, dtype=dtype)
-      tf.get_variable("beta", shape=shape, initializer=beta_init, dtype=dtype)
-    normalized = tf_slim.layer_norm(inp, reuse=True, scope=scope)
-    return normalized
+    if scope not in self._norm_vars:
+      gamma_init = tf.constant_initializer(self._norm_gain)
+      beta_init = tf.constant_initializer(self._norm_shift)
+      gamma = self.add_weight(
+          scope + "_gamma", shape=shape, initializer=gamma_init, dtype=dtype)
+      beta = self.add_weight(
+          scope + "_beta", shape=shape, initializer=beta_init, dtype=dtype)
+      self._norm_vars[scope] = (gamma, beta)
+    gamma, beta = self._norm_vars[scope]
+    mean, var = tf.nn.moments(inp, axes=[1], keepdims=True)
+    normalized = (inp - mean) / tf.sqrt(var + 1e-12)
+    return normalized * gamma + beta
 
   def _linear(self, args):
     out_size = 4 * self._num_units
     proj_size = args.get_shape()[-1]
     dtype = args.dtype
-    weights = tf.get_variable("kernel", [proj_size, out_size], dtype=dtype)
-    out = tf.matmul(args, weights)
+    if self._kernel is None:
+      self._kernel = self.add_weight(
+          "kernel", shape=[proj_size, out_size], dtype=dtype)
+    out = tf.matmul(args, self._kernel)
     if not self._layer_norm:
-      bias = tf.get_variable("bias", [out_size], dtype=dtype)
-      out = tf.nn.bias_add(out, bias)
+      if self._bias is None:
+        self._bias = self.add_weight(
+            "bias", shape=[out_size], dtype=dtype, initializer=tf.zeros_initializer())
+      out = tf.nn.bias_add(out, self._bias)
     return out
 
   def call(self, inputs, state):
@@ -908,5 +900,5 @@ class LayerNormBasicLSTMCell(rnn_cell.RNNCell):
       new_c = self._norm(new_c, "state", dtype=dtype)
     new_h = self._activation(new_c) * tf.math.sigmoid(o)
 
-    new_state = rnn_cell.LSTMStateTuple(new_c, new_h)
+    new_state = LSTMStateTuple(new_c, new_h)
     return new_h, new_state

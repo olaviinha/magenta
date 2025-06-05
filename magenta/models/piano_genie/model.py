@@ -39,7 +39,7 @@ def simple_lstm_encoder(features,
   else:
     raise NotImplementedError()
 
-  cell = rnn.MultiRNNCell(
+  cell = tf.keras.layers.StackedRNNCells(
       [celltype(rnn_nunits) for _ in range(rnn_nlayers)])
 
   with tf.variable_scope("rnn"):
@@ -81,7 +81,7 @@ def simple_lstm_decoder(features,
   else:
     raise NotImplementedError()
 
-  cell = rnn.MultiRNNCell(
+  cell = tf.keras.layers.StackedRNNCells(
       [celltype(rnn_nunits) for _ in range(rnn_nlayers)])
 
   with tf.variable_scope("rnn"):

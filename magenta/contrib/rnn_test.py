@@ -524,9 +524,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
         m1 = tf.zeros([1, 2])
         m2 = tf.zeros([1, 2])
         m3 = tf.zeros([1, 2])
-        g, ((out_m0, out_m1), (out_m2, out_m3)) = rnn_cell.MultiRNNCell(
-            [contrib_rnn.LSTMBlockCell(2)
-             for _ in range(2)], state_is_tuple=True)(x, ((m0, m1), (m2, m3)))
+        cell = tf.keras.layers.StackedRNNCells(
+            [contrib_rnn.LSTMBlockCell(2) for _ in range(2)])
+        g, ((out_m0, out_m1), (out_m2, out_m3)) = cell(x, ((m0, m1), (m2, m3)))
         sess.run([tf.global_variables_initializer()])
         res = sess.run([g, out_m0, out_m1, out_m2, out_m3], {
             x.name: np.array([[1., 1.]]),
@@ -585,9 +585,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
         m1 = tf.zeros([1, 2])
         m2 = tf.zeros([1, 2])
         m3 = tf.zeros([1, 2])
-        g, ((out_m0, out_m1), (out_m2, out_m3)) = rnn_cell.MultiRNNCell(
-            [rnn_cell.BasicLSTMCell(2, state_is_tuple=True) for _ in range(2)],
-            state_is_tuple=True)(x, ((m0, m1), (m2, m3)))
+        cell_basic = tf.keras.layers.StackedRNNCells(
+            [rnn_cell.BasicLSTMCell(2, state_is_tuple=True) for _ in range(2)])
+        g, ((out_m0, out_m1), (out_m2, out_m3)) = cell_basic(x, ((m0, m1), (m2, m3)))
         sess.run([tf.global_variables_initializer()])
         basic_res = sess.run([g, out_m0, out_m1, out_m2, out_m3], {
             x.name: x_values,
@@ -602,9 +602,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
         m1 = tf.zeros([1, 2])
         m2 = tf.zeros([1, 2])
         m3 = tf.zeros([1, 2])
-        g, ((out_m0, out_m1), (out_m2, out_m3)) = rnn_cell.MultiRNNCell(
-            [contrib_rnn.LSTMBlockCell(2)
-             for _ in range(2)], state_is_tuple=True)(x, ((m0, m1), (m2, m3)))
+        cell_block = tf.keras.layers.StackedRNNCells(
+            [contrib_rnn.LSTMBlockCell(2) for _ in range(2)])
+        g, ((out_m0, out_m1), (out_m2, out_m3)) = cell_block(x, ((m0, m1), (m2, m3)))
         sess.run([tf.global_variables_initializer()])
         block_res = sess.run([g, out_m0, out_m1, out_m2, out_m3], {
             x.name: x_values,
@@ -635,12 +635,11 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
         m1 = tf.zeros([1, 2])
         m2 = tf.zeros([1, 2])
         m3 = tf.zeros([1, 2])
-        g, ((out_m0, out_m1), (out_m2, out_m3)) = rnn_cell.MultiRNNCell(
-            [
+        cell_basic = tf.keras.layers.StackedRNNCells([
                 rnn_cell.LSTMCell(2, use_peepholes=True, state_is_tuple=True)
                 for _ in range(2)
-            ],
-            state_is_tuple=True)(x, ((m0, m1), (m2, m3)))
+            ])
+        g, ((out_m0, out_m1), (out_m2, out_m3)) = cell_basic(x, ((m0, m1), (m2, m3)))
         sess.run([tf.global_variables_initializer()])
         basic_res = sess.run([g, out_m0, out_m1, out_m2, out_m3], {
             x.name: x_values,
@@ -655,9 +654,9 @@ class LSTMBlockCellTest(tf.test.TestCase, parameterized.TestCase):
         m1 = tf.zeros([1, 2])
         m2 = tf.zeros([1, 2])
         m3 = tf.zeros([1, 2])
-        g, ((out_m0, out_m1), (out_m2, out_m3)) = rnn_cell.MultiRNNCell(
-            [contrib_rnn.LSTMBlockCell(2, use_peephole=True) for _ in range(2)],
-            state_is_tuple=True)(x, ((m0, m1), (m2, m3)))
+        cell_block = tf.keras.layers.StackedRNNCells([
+            contrib_rnn.LSTMBlockCell(2, use_peephole=True) for _ in range(2)])
+        g, ((out_m0, out_m1), (out_m2, out_m3)) = cell_block(x, ((m0, m1), (m2, m3)))
         sess.run([tf.global_variables_initializer()])
         block_res = sess.run([g, out_m0, out_m1, out_m2, out_m3], {
             x.name: x_values,
@@ -689,7 +688,7 @@ class LayerNormBasicLSTMCellTest(tf.test.TestCase):
         state1 = rnn_cell.LSTMStateTuple(c1, h1)
         state = (state0, state1)
         single_cell = lambda: contrib_rnn.LayerNormBasicLSTMCell(2)
-        cell = rnn_cell.MultiRNNCell([single_cell() for _ in range(2)])
+        cell = tf.keras.layers.StackedRNNCells([single_cell() for _ in range(2)])
         g, out_m = cell(x, state)
         sess.run([tf.global_variables_initializer()])
         res = sess.run(
@@ -757,7 +756,7 @@ class LayerNormBasicLSTMCellTest(tf.test.TestCase):
         state1 = rnn_cell.LSTMStateTuple(c1, h1)
         state = (state0, state1)
         single_cell = lambda: contrib_rnn.LayerNormBasicLSTMCell(2, layer_norm=False)  # pylint: disable=line-too-long
-        cell = rnn_cell.MultiRNNCell([single_cell() for _ in range(2)])
+        cell = tf.keras.layers.StackedRNNCells([single_cell() for _ in range(2)])
         g, out_m = cell(x, state)
         sess.run([tf.global_variables_initializer()])
         res = sess.run(
@@ -822,7 +821,7 @@ class LayerNormBasicLSTMCellTest(tf.test.TestCase):
         c1 = tf.zeros([1, 2])
         h1 = tf.zeros([1, 2])
         state1 = rnn_cell.LSTMStateTuple(c1, h1)
-        cell = rnn_cell.MultiRNNCell(
+        cell = tf.keras.layers.StackedRNNCells(
             [contrib_rnn.LayerNormBasicLSTMCell(2) for _ in range(2)])
         h, (s0, s1) = cell(x, (state0, state1))
         sess.run([tf.global_variables_initializer()])
@@ -860,7 +859,7 @@ class LayerNormBasicLSTMCellTest(tf.test.TestCase):
         c1 = tf.zeros([1, 2])
         h1 = tf.zeros([1, 2])
         state1 = rnn_cell.LSTMStateTuple(c1, h1)
-        cell = rnn_cell.MultiRNNCell([
+        cell = tf.keras.layers.StackedRNNCells([
             contrib_rnn.LayerNormBasicLSTMCell(
                 2, layer_norm=True, norm_gain=1.0, norm_shift=0.0)
             for _ in range(2)

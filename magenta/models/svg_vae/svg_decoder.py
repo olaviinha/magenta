@@ -137,7 +137,7 @@ class SVGDecoder(t2t_model.T2TModel):
     batch_size = common_layers.shape_list(inputs)[0]
     zero_pad, logits_so_far = self.create_initial_input_for_decode(batch_size)
 
-    layers = rnn.MultiRNNCell([
+    layers = tf.keras.layers.StackedRNNCells([
         self.lstm_cell(hparams, train) for _ in range(hparams.num_hidden_layers)
     ])
 
@@ -243,7 +243,7 @@ class SVGDecoder(t2t_model.T2TModel):
   def lstm_decoder(self, inputs, sequence_length, hparams, clss, train,
                    initial_state=None, bottleneck=None):
     # NOT IN PREDICT MODE. JUST RUN TEACHER-FORCED RNN:
-    layers = rnn.MultiRNNCell([
+    layers = tf.keras.layers.StackedRNNCells([
         self.lstm_cell(hparams, train) for _ in range(hparams.num_hidden_layers)
     ])
 
