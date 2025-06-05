@@ -29,8 +29,8 @@ import os
 from note_seq import abc_parser
 from note_seq import midi_io
 from note_seq import musicxml_reader
-from absl import app, flags
-import tensorflow.compat.v1 as tf
+from absl import app, flags, logging
+import tensorflow as tf
 
 FLAGS = flags.FLAGS
 
@@ -80,20 +80,20 @@ def convert_files(root_dir, sub_dir, writer, recursive=False):
     A map from the resulting Futures to the file paths being converted.
   """
   dir_to_convert = os.path.join(root_dir, sub_dir)
-  tf.logging.info("Converting files in '%s'.", dir_to_convert)
-  files_in_dir = tf.gfile.ListDirectory(os.path.join(dir_to_convert))
+  logging.info("Converting files in '%s'.", dir_to_convert)
+  files_in_dir = tf.io.gfile.listdir(os.path.join(dir_to_convert))
   recurse_sub_dirs = []
   written_count = 0
   for file_in_dir in files_in_dir:
-    tf.logging.log_every_n(tf.logging.INFO, '%d files converted.',
-                           1000, written_count)
+    if written_count % 1000 == 0:
+      logging.info('%d files converted.', written_count)
     full_file_path = os.path.join(dir_to_convert, file_in_dir)
     if (full_file_path.lower().endswith('.mid') or
         full_file_path.lower().endswith('.midi')):
       try:
         sequence = convert_midi(root_dir, sub_dir, full_file_path)
       except Exception as exc:  # pylint: disable=broad-except
-        tf.logging.fatal('%r generated an exception: %s', full_file_path, exc)
+        logging.fatal('%r generated an exception: %s', full_file_path, exc)
         continue
       if sequence:
         writer.write(sequence.SerializeToString())
@@ -102,7 +102,7 @@ def convert_files(root_dir, sub_dir, writer, recursive=False):
       try:
         sequence = convert_musicxml(root_dir, sub_dir, full_file_path)
       except Exception as exc:  # pylint: disable=broad-except
-        tf.logging.fatal('%r generated an exception: %s', full_file_path, exc)
+        logging.fatal('%r generated an exception: %s', full_file_path, exc)
         continue
       if sequence:
         writer.write(sequence.SerializeToString())
@@ -110,16 +110,16 @@ def convert_files(root_dir, sub_dir, writer, recursive=False):
       try:
         sequences = convert_abc(root_dir, sub_dir, full_file_path)
       except Exception as exc:  # pylint: disable=broad-except
-        tf.logging.fatal('%r generated an exception: %s', full_file_path, exc)
+        logging.fatal('%r generated an exception: %s', full_file_path, exc)
         continue
       if sequences:
         for sequence in sequences:
           writer.write(sequence.SerializeToString())
     else:
-      if recursive and tf.gfile.IsDirectory(full_file_path):
+      if recursive and tf.io.gfile.isdir(full_file_path):
         recurse_sub_dirs.append(os.path.join(sub_dir, file_in_dir))
       else:
-        tf.logging.warning(
+        logging.warning(
             'Unable to find a converter for file %s', full_file_path)
 
   for recurse_sub_dir in recurse_sub_dirs:
@@ -140,9 +140,9 @@ def convert_midi(root_dir, sub_dir, full_file_path):
   """
   try:
     sequence = midi_io.midi_to_sequence_proto(
-        tf.gfile.GFile(full_file_path, 'rb').read())
+        tf.io.gfile.GFile(full_file_path, 'rb').read())
   except midi_io.MIDIConversionError as e:
-    tf.logging.warning(
+    logging.warning(
         'Could not parse MIDI file %s. It will be skipped. Error was: %s',
         full_file_path, e)
     return None
@@ -150,7 +150,7 @@ def convert_midi(root_dir, sub_dir, full_file_path):
   sequence.filename = os.path.join(sub_dir, os.path.basename(full_file_path))
   sequence.id = generate_note_sequence_id(
       sequence.filename, sequence.collection_name, 'midi')
-  tf.logging.info('Converted MIDI file %s.', full_file_path)
+  logging.info('Converted MIDI file %s.', full_file_path)
   return sequence
 
 
@@ -169,7 +169,7 @@ def convert_musicxml(root_dir, sub_dir, full_file_path):
   try:
     sequence = musicxml_reader.musicxml_file_to_sequence_proto(full_file_path)
   except musicxml_reader.MusicXMLConversionError as e:
-    tf.logging.warning(
+    logging.warning(
         'Could not parse MusicXML file %s. It will be skipped. Error was: %s',
         full_file_path, e)
     return None
@@ -177,7 +177,7 @@ def convert_musicxml(root_dir, sub_dir, full_file_path):
   sequence.filename = os.path.join(sub_dir, os.path.basename(full_file_path))
   sequence.id = generate_note_sequence_id(
       sequence.filename, sequence.collection_name, 'musicxml')
-  tf.logging.info('Converted MusicXML file %s.', full_file_path)
+  logging.info('Converted MusicXML file %s.', full_file_path)
   return sequence
 
 
@@ -195,15 +195,15 @@ def convert_abc(root_dir, sub_dir, full_file_path):
   """
   try:
     tunes, exceptions = abc_parser.parse_abc_tunebook(
-        tf.gfile.GFile(full_file_path, 'rb').read())
+        tf.io.gfile.GFile(full_file_path, 'rb').read())
   except abc_parser.ABCParseError as e:
-    tf.logging.warning(
+    logging.warning(
         'Could not parse ABC file %s. It will be skipped. Error was: %s',
         full_file_path, e)
     return None
 
   for exception in exceptions:
-    tf.logging.warning(
+    logging.warning(
         'Could not parse tune in ABC file %s. It will be skipped. Error was: '
         '%s', full_file_path, exception)
 
@@ -214,7 +214,7 @@ def convert_abc(root_dir, sub_dir, full_file_path):
     tune.id = generate_note_sequence_id(
         '{}_{}'.format(tune.filename, idx), tune.collection_name, 'abc')
     sequences.append(tune)
-    tf.logging.info('Converted ABC file %s.', full_file_path)
+    logging.info('Converted ABC file %s.', full_file_path)
   return sequences
 
 
@@ -238,13 +238,13 @@ def convert_directory(root_dir, output_file, recursive=False):
 
 def main(argv):
   del argv
-  tf.logging.set_verbosity(FLAGS.log)
+  logging.set_verbosity(FLAGS.log)
 
   if not FLAGS.input_dir:
-    tf.logging.fatal('--input_dir required')
+    logging.fatal('--input_dir required')
     return
   if not FLAGS.output_file:
-    tf.logging.fatal('--output_file required')
+    logging.fatal('--output_file required')
     return
 
   input_dir = os.path.expanduser(FLAGS.input_dir)
@@ -252,10 +252,9 @@ def main(argv):
   output_dir = os.path.dirname(output_file)
 
   if output_dir:
-    tf.gfile.MakeDirs(output_dir)
+    tf.io.gfile.makedirs(output_dir)
 
   convert_directory(input_dir, output_file, FLAGS.recursive)
 
 if __name__ == '__main__':
-  tf.disable_v2_behavior()
   app.run(main)
