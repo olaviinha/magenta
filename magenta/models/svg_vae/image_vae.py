@@ -139,41 +139,41 @@ class ImageVAE(t2t_model.T2TModel):
       clss = tf.reshape(clss, [-1])
 
       # conv layer, followed by instance norm + FiLM
-      ret = tf.layers.Conv2D(hparams.base_depth, 5, 1,
+      ret = tf.keras.layers.Conv2D(hparams.base_depth, 5, 1,
                              padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2D(hparams.base_depth, 5, 2,
+      ret = tf.keras.layers.Conv2D(hparams.base_depth, 5, 2,
                              padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2D(2 * hparams.base_depth, 5, 1,
+      ret = tf.keras.layers.Conv2D(2 * hparams.base_depth, 5, 1,
                              padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2D(2 * hparams.base_depth, 5, 2,
-                             padding='SAME', activation=None)(ret)
-      ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
-      ret = tf.nn.relu(ret)
-
-      # new conv layer, to bring shape down
-      ret = tf.layers.Conv2D(2 * hparams.bottleneck_bits, 4, 2,
+      ret = tf.keras.layers.Conv2D(2 * hparams.base_depth, 5, 2,
                              padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
       # new conv layer, to bring shape down
-      ret = tf.layers.Conv2D(2 * hparams.bottleneck_bits, 4, 2,
+      ret = tf.keras.layers.Conv2D(2 * hparams.bottleneck_bits, 4, 2,
+                             padding='SAME', activation=None)(ret)
+      ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
+      ret = tf.nn.relu(ret)
+
+      # new conv layer, to bring shape down
+      ret = tf.keras.layers.Conv2D(2 * hparams.bottleneck_bits, 4, 2,
                              padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
       # ret has 1024
-      ret = tf.layers.flatten(ret)
-      ret = tf.layers.dense(ret, 2 * hparams.bottleneck_bits, activation=None)
+      ret = tf.keras.layers.flatten(ret)
+      ret = tf.keras.layers.dense(ret, 2 * hparams.bottleneck_bits, activation=None)
 
     return ret
 
@@ -181,48 +181,48 @@ class ImageVAE(t2t_model.T2TModel):
     # goes from [batch, bottleneck_bits] to [batch, 64, 64, 1]
     with tf.variable_scope('visual_decoder', reuse=tf.AUTO_REUSE):
       # unbottleneck
-      ret = tf.layers.dense(bottleneck, 1024, activation=None)
+      ret = tf.keras.layers.dense(bottleneck, 1024, activation=None)
       ret = tf.reshape(ret, [-1, 4, 4, 64])
       clss = tf.reshape(clss, [-1])
 
       # new deconv to bring shape up
-      ret = tf.layers.Conv2DTranspose(2 * hparams.base_depth, 4, 2,
+      ret = tf.keras.layers.Conv2DTranspose(2 * hparams.base_depth, 4, 2,
                                       padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
       # new deconv to bring shape up
-      ret = tf.layers.Conv2DTranspose(2 * hparams.base_depth, 4, 2,
+      ret = tf.keras.layers.Conv2DTranspose(2 * hparams.base_depth, 4, 2,
                                       padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2DTranspose(2 * hparams.base_depth, 5, padding='SAME',
+      ret = tf.keras.layers.Conv2DTranspose(2 * hparams.base_depth, 5, padding='SAME',
                                       activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2DTranspose(2 * hparams.base_depth, 5, 2,
+      ret = tf.keras.layers.Conv2DTranspose(2 * hparams.base_depth, 5, 2,
                                       padding='SAME', activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2DTranspose(hparams.base_depth, 5, padding='SAME',
+      ret = tf.keras.layers.Conv2DTranspose(hparams.base_depth, 5, padding='SAME',
                                       activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2DTranspose(hparams.base_depth, 5, 2, padding='SAME',
+      ret = tf.keras.layers.Conv2DTranspose(hparams.base_depth, 5, 2, padding='SAME',
                                       activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2DTranspose(hparams.base_depth, 5, padding='SAME',
+      ret = tf.keras.layers.Conv2DTranspose(hparams.base_depth, 5, padding='SAME',
                                       activation=None)(ret)
       ret = ops.conditional_instance_norm(ret, clss, hparams.num_categories)
       ret = tf.nn.relu(ret)
 
-      ret = tf.layers.Conv2D(1, 5, padding='SAME', activation=None)(ret)
+      ret = tf.keras.layers.Conv2D(1, 5, padding='SAME', activation=None)(ret)
 
       ret = tfd.Independent(tfd.Bernoulli(logits=ret),
                             reinterpreted_batch_ndims=3,

@@ -157,7 +157,7 @@ class Decoder(object, metaclass=abc.ABCMeta):
     return False
 
 
-class BaseDecoder(tf.layers.Layer):
+class BaseDecoder(tf.keras.layers.Layer):
   """An RNN Decoder that is based on a Keras layer.
 
   Concepts used by this interface:
@@ -1002,7 +1002,7 @@ class BasicDecoder(Decoder):
     if not isinstance(helper, Helper):
       raise TypeError("helper must be a Helper, received: %s" % type(helper))
     if (output_layer is not None and
-        not isinstance(output_layer, tf.layers.Layer)):
+        not isinstance(output_layer, tf.keras.layers.Layer)):
       raise TypeError("output_layer must be a Layer, received: %s" %
                       type(output_layer))
     self._cell = cell

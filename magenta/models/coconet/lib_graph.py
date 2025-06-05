@@ -277,7 +277,7 @@ class CoconetGraph(object):
       tf.logging.info('dilation_rate %r', dilation_rate)
       if num_splits > 1:
         num_outputs = None
-      conv = tf.layers.separable_conv2d(
+      conv = tf.keras.layers.separable_conv2d(
           x,
           num_outputs,
           filter_shape[:2],
@@ -293,7 +293,7 @@ class CoconetGraph(object):
         print(len(splits), splits[0].shape)
         # TODO(annahuang): support non equal splits.
         pointwise_splits = [
-            tf.layers.dense(splits[i], filter_shape[3]/num_splits,
+            tf.keras.layers.dense(splits[i], filter_shape[3]/num_splits,
                             name='split_%d_%d' % (layer_idx, i))
             for i in range(num_splits)]
         conv = tf.concat((pointwise_splits), axis=-1)

@@ -182,7 +182,7 @@ class BasicDecoderTest(tf.test.TestCase):
       helper = seq2seq.TrainingHelper(
           inputs, sequence_length, time_major=False)
       if use_output_layer:
-        output_layer = tf.layers.Dense(output_layer_depth, use_bias=False)
+        output_layer = tf.keras.layers.Dense(output_layer_depth, use_bias=False)
         expected_output_depth = output_layer_depth
       else:
         output_layer = None

@@ -198,7 +198,7 @@ class SVGDecoder(t2t_model.T2TModel):
 
       # RUN PRE-LSTM LAYER
       with tf.variable_scope('pre_decoder', reuse=tf.AUTO_REUSE):
-        inputs = tf.layers.dense(inputs, hparams.hidden_size, name='bottom')
+        inputs = tf.keras.layers.dense(inputs, hparams.hidden_size, name='bottom')
         inputs = tf.nn.tanh(inputs)
 
       # RUN LSTM
@@ -272,7 +272,7 @@ class SVGDecoder(t2t_model.T2TModel):
     inputs = tf.concat([inputs, overlay_x], -1)
 
     with tf.variable_scope('pre_decoder', reuse=tf.AUTO_REUSE):
-      inputs = tf.layers.dense(inputs, hparams.hidden_size, name='bottom')
+      inputs = tf.keras.layers.dense(inputs, hparams.hidden_size, name='bottom')
       inputs = tf.nn.tanh(inputs)
 
     with tf.variable_scope('lstm_decoder', reuse=tf.AUTO_REUSE):
@@ -295,7 +295,7 @@ class SVGDecoder(t2t_model.T2TModel):
 
   def unbottleneck(self, x, res_size, reuse=tf.AUTO_REUSE, name_append=''):
     with tf.variable_scope('unbottleneck{}'.format(name_append), reuse=reuse):
-      x = tf.layers.dense(x, res_size, name='dense', activation='tanh')
+      x = tf.keras.layers.dense(x, res_size, name='dense', activation='tanh')
       return x
 
   def create_initial_input_for_decode(self, batch_size):

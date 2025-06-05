@@ -28,11 +28,12 @@ import re
 from note_seq import abc_parser
 from note_seq import midi_io
 from note_seq import sequences_lib
+from absl import app, flags
 import tensorflow.compat.v1 as tf
 
-FLAGS = tf.app.flags.FLAGS
+FLAGS = flags.FLAGS
 
-tf.app.flags.DEFINE_string('input_dir', None,
+flags.DEFINE_string('input_dir', None,
                            'Directory containing files to convert.')
 
 # pylint: disable=forgotten-debug-statement
@@ -91,7 +92,8 @@ class CompareDirectory(tf.test.TestCase):
         self.assertEqual(midi_ns.total_time, expanded_tune.total_time)
 
 
-def main(unused_argv):
+def main(argv):
+  del argv
   if not FLAGS.input_dir:
     tf.logging.fatal('--input_dir required')
     return
@@ -100,10 +102,5 @@ def main(unused_argv):
 
   CompareDirectory().compare_directory(input_dir)
 
-
-def console_entry_point():
-  tf.app.run(main)
-
-
 if __name__ == '__main__':
-  console_entry_point()
+  app.run(main)

@@ -69,7 +69,7 @@ def discriminator_fn_specgram(images, **kwargs):
       kernel_size=kwargs['kernel_size'],
       simple_arch=kwargs['simple_arch'])
   with tf.variable_scope('discriminator_cond'):
-    x = tf.layers.flatten(end_points['last_conv'])
+    x = tf.keras.layers.flatten(end_points['last_conv'])
     end_points['classification_logits'] = layers.custom_dense(
         x=x, units=kwargs['num_tokens'], scope='classification_logits')
   return logits, end_points

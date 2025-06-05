@@ -32,7 +32,7 @@ def simple_lstm_encoder(features,
   x = features
 
   with tf.variable_scope("rnn_input"):
-    x = tf.layers.dense(x, rnn_nunits)
+    x = tf.keras.layers.dense(x, rnn_nunits)
 
   if rnn_celltype == "lstm":
     celltype = contrib_rnn.LSTMBlockCell
@@ -74,7 +74,7 @@ def simple_lstm_decoder(features,
   x = features
 
   with tf.variable_scope("rnn_input"):
-    x = tf.layers.dense(x, rnn_nunits)
+    x = tf.keras.layers.dense(x, rnn_nunits)
 
   if rnn_celltype == "lstm":
     celltype = contrib_rnn.LSTMBlockCell
@@ -185,7 +185,7 @@ def build_genie_model(feat_dict,
   # Step embeddings (single vector per timestep)
   if cfg.stp_emb_unconstrained:
     with tf.variable_scope("stp_emb_unconstrained"):
-      stp_emb_unconstrained = tf.layers.dense(
+      stp_emb_unconstrained = tf.keras.layers.dense(
           enc_stp, cfg.stp_emb_unconstrained_embedding_dim)
 
     out_dict["stp_emb_unconstrained"] = stp_emb_unconstrained
@@ -197,7 +197,7 @@ def build_genie_model(feat_dict,
     with tf.variable_scope("stp_emb_vq"):
       with tf.variable_scope("pre_vq"):
         # pre_vq_encoding is tf.float32 of [batch_size, seq_len, embedding_dim]
-        pre_vq_encoding = tf.layers.dense(enc_stp, cfg.stp_emb_vq_embedding_dim)
+        pre_vq_encoding = tf.keras.layers.dense(enc_stp, cfg.stp_emb_vq_embedding_dim)
 
       with tf.variable_scope("quantizer"):
         assert stp_varlen_mask is None
@@ -230,7 +230,7 @@ def build_genie_model(feat_dict,
     with tf.variable_scope("stp_emb_iq"):
       with tf.variable_scope("pre_iq"):
         # pre_iq_encoding is tf.float32 of [batch_size, seq_len]
-        pre_iq_encoding = tf.layers.dense(enc_stp, 1)[:, :, 0]
+        pre_iq_encoding = tf.keras.layers.dense(enc_stp, 1)[:, :, 0]
 
       def iqst(x, n):
         """Integer quantization with straight-through estimator."""
@@ -337,7 +337,7 @@ def build_genie_model(feat_dict,
   # Sequence embedding (single vector per sequence)
   if cfg.seq_emb_unconstrained:
     with tf.variable_scope("seq_emb_unconstrained"):
-      seq_emb_unconstrained = tf.layers.dense(
+      seq_emb_unconstrained = tf.keras.layers.dense(
           enc_seq, cfg.seq_emb_unconstrained_embedding_dim)
 
     out_dict["seq_emb_unconstrained"] = seq_emb_unconstrained
@@ -348,7 +348,7 @@ def build_genie_model(feat_dict,
   # Sequence embeddings (variational w/ reparameterization trick)
   if cfg.seq_emb_vae:
     with tf.variable_scope("seq_emb_vae"):
-      seq_emb_vae = tf.layers.dense(enc_seq, cfg.seq_emb_vae_embedding_dim * 2)
+      seq_emb_vae = tf.keras.layers.dense(enc_seq, cfg.seq_emb_vae_embedding_dim * 2)
 
       mean = seq_emb_vae[:, :cfg.seq_emb_vae_embedding_dim]
       stddev = 1e-6 + tf.nn.softplus(
@@ -378,7 +378,7 @@ def build_genie_model(feat_dict,
           batch_size, seq_len // cfg.lor_emb_n,
           cfg.lor_emb_n * rnn_embedding_dim
       ])
-      lor_emb_unconstrained = tf.layers.dense(
+      lor_emb_unconstrained = tf.keras.layers.dense(
           enc_lor, cfg.lor_emb_unconstrained_embedding_dim)
 
       out_dict["lor_emb_unconstrained"] = lor_emb_unconstrained
@@ -437,7 +437,7 @@ def build_genie_model(feat_dict,
         rnn_nunits=cfg.rnn_nunits)
 
     with tf.variable_scope("pitches"):
-      dec_recons_logits = tf.layers.dense(dec_stp, 88)
+      dec_recons_logits = tf.keras.layers.dense(dec_stp, 88)
 
     dec_recons_loss = weighted_avg(
         tf.nn.sparse_softmax_cross_entropy_with_logits(
@@ -455,7 +455,7 @@ def build_genie_model(feat_dict,
 
     if cfg.dec_pred_velocity:
       with tf.variable_scope("velocities"):
-        dec_recons_velocity_logits = tf.layers.dense(
+        dec_recons_velocity_logits = tf.keras.layers.dense(
             dec_stp, cfg.data_max_discrete_velocities + 1)
 
       dec_recons_velocity_loss = weighted_avg(
