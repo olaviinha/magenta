@@ -329,3 +329,23 @@ class DataLoader(object):
       result[i, 0, 3] = self.start_stroke_token[3]
       result[i, 0, 4] = self.start_stroke_token[4]
     return result
+
+  def as_dataset(self, shuffle=True, repeat=False):
+    """Return a tf.data.Dataset generating batches from this loader."""
+    import tensorflow as tf
+
+    def gen():
+      while True:
+        _, x, s = self.random_batch()
+        yield x.astype(np.float32), s.astype(np.int32)
+        if not repeat:
+          break
+
+    output_types = (tf.float32, tf.int32)
+    output_shapes = (
+        tf.TensorShape([self.batch_size, self.max_seq_length + 1, 5]),
+        tf.TensorShape([self.batch_size]))
+    ds = tf.data.Dataset.from_generator(gen, output_types, output_shapes)
+    if shuffle:
+      ds = ds.shuffle(100)
+    return ds

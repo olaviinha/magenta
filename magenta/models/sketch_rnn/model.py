@@ -116,7 +116,7 @@ class Model(object):
         weight_start=0.001)
     return mu, presig
 
-  def build_model(self, hps):
+  def build_model(self, hps, input_data=None, sequence_lengths=None):
     """Define model architecture."""
     if hps.is_training:
       self.global_step = tf.Variable(0, name='global_step', trainable=False)
@@ -184,11 +184,30 @@ class Model(object):
           cell, output_keep_prob=self.hps.output_dropout_prob)
     self.cell = cell
 
-    self.sequence_lengths = tf.placeholder(
-        dtype=tf.int32, shape=[self.hps.batch_size])
-    self.input_data = tf.placeholder(
-        dtype=tf.float32,
-        shape=[self.hps.batch_size, self.hps.max_seq_len + 1, 5])
+    if sequence_lengths is None:
+      if tf.executing_eagerly():
+        self.sequence_lengths = tf.keras.Input(
+            dtype=tf.int32,
+            shape=(self.hps.batch_size,),
+            name='sequence_lengths')
+      else:
+        self.sequence_lengths = tf.placeholder(
+            dtype=tf.int32, shape=[self.hps.batch_size])
+    else:
+      self.sequence_lengths = sequence_lengths
+
+    if input_data is None:
+      if tf.executing_eagerly():
+        self.input_data = tf.keras.Input(
+            dtype=tf.float32,
+            shape=(self.hps.batch_size, self.hps.max_seq_len + 1, 5),
+            name='input_data')
+      else:
+        self.input_data = tf.placeholder(
+            dtype=tf.float32,
+            shape=[self.hps.batch_size, self.hps.max_seq_len + 1, 5])
+    else:
+      self.input_data = input_data
 
     # The target/expected vectors of strokes
     self.output_x = self.input_data[:, 1:self.hps.max_seq_len + 1, :]
