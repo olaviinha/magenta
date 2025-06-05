@@ -20,14 +20,15 @@ $ python magenta/scripts/unpack_bundle.py \
 """
 
 from magenta.models.shared import sequence_generator_bundle
-import tensorflow.compat.v1 as tf
+from absl import app, flags
+import tensorflow as tf
 
-FLAGS = tf.app.flags.FLAGS
-tf.app.flags.DEFINE_string('bundle_path', '',
-                           'Path to .mag file containing the bundle')
-tf.app.flags.DEFINE_string('checkpoint_path', '/tmp/model.ckpt',
-                           'Path where the extracted checkpoint should'
-                           'be saved')
+FLAGS = flags.FLAGS
+flags.DEFINE_string('bundle_path', '',
+                    'Path to .mag file containing the bundle')
+flags.DEFINE_string('checkpoint_path', '/tmp/model.ckpt',
+                    'Path where the extracted checkpoint should'
+                    ' be saved')
 
 
 def main(_):
@@ -37,12 +38,11 @@ def main(_):
 
   bundle = sequence_generator_bundle.read_bundle_file(bundle_file)
 
-  with tf.gfile.Open(checkpoint_file, 'wb') as f:
+  with tf.io.gfile.GFile(checkpoint_file, 'wb') as f:
     f.write(bundle.checkpoint_file[0])
 
-  with tf.gfile.Open(metagraph_filename, 'wb') as f:
+  with tf.io.gfile.GFile(metagraph_filename, 'wb') as f:
     f.write(bundle.metagraph_file)
 
 if __name__ == '__main__':
-  tf.disable_v2_behavior()
-  tf.app.run()
+  app.run(main)
