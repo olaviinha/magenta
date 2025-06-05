@@ -102,7 +102,7 @@ def lstm_layer(inputs,
   else:
     with tf.variable_scope('lstm'):
       outputs, unused_state = tf.nn.dynamic_rnn(
-          cell=tf.nn.rnn_cell.MultiRNNCell(cells_fw),
+          cell=tf.keras.layers.StackedRNNCells(cells_fw),
           inputs=inputs,
           dtype=tf.float32,
           sequence_length=lengths,
@@ -163,7 +163,7 @@ def lstm_layer_static_for_tflite(inputs,
   else:  # not bidirectional
     with tf.variable_scope('lstm'):
       outputs, unused_state = tf.nn.static_rnn(
-          cell=tf.nn.rnn_cell.MultiRNNCell(cells_fw),
+          cell=tf.keras.layers.StackedRNNCells(cells_fw),
           inputs=prev_layer,
           sequence_length=lengths,
           dtype=tf.float32)

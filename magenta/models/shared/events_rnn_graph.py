@@ -60,7 +60,7 @@ def make_rnn_cell(rnn_layer_sizes,
         cell, output_keep_prob=dropout_keep_prob)
     cells.append(cell)
 
-  cell = rnn.MultiRNNCell(cells)
+  cell = tf.keras.layers.StackedRNNCells(cells)
 
   return cell
 

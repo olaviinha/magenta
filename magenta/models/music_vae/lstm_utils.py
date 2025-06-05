@@ -36,7 +36,7 @@ def rnn_cell(rnn_cell_size, dropout_keep_prob, residual, is_training=True):
         cell,
         input_keep_prob=dropout_keep_prob)
     cells.append(cell)
-  return rnn.MultiRNNCell(cells)
+  return tf.keras.layers.StackedRNNCells(cells)
 
 
 def build_bidirectional_lstm(
